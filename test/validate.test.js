@@ -286,6 +286,12 @@ describe('function/validate', function () {
       }, /TypeError: schema object expected/)
     })
 
+    it('fails if min is greater max', function () {
+      assert.throws(() => {
+        objectT({}, { min: 10, max: 1 })
+      }, /RangeError: min, max issue/)
+    })
+
     it('object validation', function () {
       equal(objectT({})(), true)
       equal(objectT({}, REQUIRED)(), false)
@@ -306,10 +312,7 @@ describe('function/validate', function () {
         message: 'object has less than 2 properties'
       })
       e = {}
-      equal(
-        objectT({}, { ...ADD_PROPS, max: 2 })({ a: 1, b: 2 }, e),
-        true
-      )
+      equal(objectT({}, { ...ADD_PROPS, max: 2 })({ a: 1, b: 2 }, e), true)
       deepEqual(e, {
         additionalProps: [['a'], ['b']],
         path: []
@@ -330,9 +333,12 @@ describe('function/validate', function () {
       int: integerT(),
       str: stringT(REQUIRED),
       arr: arrayT(numberT()),
-      obj: objectT({
-        nested: integerT()
-      }, ADD_PROPS)
+      obj: objectT(
+        {
+          nested: integerT()
+        },
+        ADD_PROPS
+      )
     }
 
     it('valid', function () {

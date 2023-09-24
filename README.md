@@ -27,7 +27,6 @@ Less than 6k if minimized.
   * [objectT()](#objectt)
   * [oneOf()](#oneof)
   * [anyOf()](#anyof)
-  * [allOf()](#allof)
 * [License](#license)
 
 <!-- toc! -->
@@ -450,36 +449,6 @@ schema({ num: 0 }) // true
 schema({ str: '', num: 0 }) // true
 ```
 
-## allOf()
-
-Data must be valid against all of the given schemas
-
-_typedef_
-
-```ts
-export function anyOf(schemas: ValidationFn[]): ValidationFn
-```
-
-_usage_
-
-```js
-// object must either contain { str: string } or { num: number } or both
-const schema = allOf([
-  objectT({ str: stringT(REQUIRED) }, ADD_PROPS),
-  objectT({ num: numberT(REQUIRED) }, ADD_PROPS),
-])
-
-schema({}, failure) // false
-// failure == {"failures":[{"path":["str"],"message":"not a string"}],"message":"allOf failed"}
-
-schema({ str: '' }, failure) // false
-// failure == {"failures":[{"path":["str"],"message":"not a string"}],"message":"allOf failed"}
-
-schema({ num: 0 }, failure) // false
-// failure == {"failures":[{"path":["str"],"message":"not a string"}],"message":"allOf failed"}
-
-schema({ str: '', num: 0 }) // true
-```
 
 # License
 

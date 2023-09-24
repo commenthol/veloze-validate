@@ -11,12 +11,6 @@ export function oneOf(schemas: ValidationFn[]): ValidationFn;
  */
 export function anyOf(schemas: ValidationFn[]): ValidationFn;
 /**
- * Data must be valid against all of the given schemas
- * @param {ValidationFn[]} schemas
- * @returns {ValidationFn}
- */
-export function allOf(schemas: ValidationFn[]): ValidationFn;
-/**
  * not() turns an allow-list into a block-list.
  * This is explicitly not supported here as to enforce secure defaults.
  * If you know what you do, write your own not().

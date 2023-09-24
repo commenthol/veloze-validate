@@ -14,7 +14,6 @@ import {
   validateUuid,
   oneOf,
   anyOf,
-  allOf,
   not
 } from '../src/index.js'
 
@@ -557,34 +556,6 @@ describe('function/validate', function () {
           { message: 'not a string', path: [] }
         ],
         message: 'anyOf failed'
-      })
-    })
-  })
-
-  describe('allOf', function () {
-    it('fails if schema is not an array', function () {
-      assert.throws(() => {
-        allOf(123)
-      }, /TypeError: schema array expected/)
-    })
-
-    it('string or number', function () {
-      const schema = allOf([
-        objectT({ num: numberT() }, { additionalProperties: true }),
-        objectT({ str: stringT(REQUIRED) }, { additionalProperties: true })
-      ])
-
-      let e = {}
-      equal(schema({ num: 1, str: 'a' }, e), true)
-      deepEqual(e, {})
-      e = {}
-      equal(schema({ num: 1 }, e), false)
-      deepEqual(e, {
-        failures: [{
-          message: 'not a string',
-          path: ['str']
-        }],
-        message: 'allOf failed'
       })
     })
   })

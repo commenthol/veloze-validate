@@ -6,7 +6,7 @@ import {
   arrayT,
   objectT,
   oneOf,
-  allOf,
+  anyOf,
   REQUIRED, // == { required: true }
   ADD_PROPS // == { additionalProperties: true }
 } from '../src/index.js'
@@ -25,7 +25,8 @@ const schema = objectT(
       },
       REQUIRED
     ),
-    any: allOf([ // either or both
+    any: anyOf([
+      // either or both
       objectT({ flag: booleanT() }, ADD_PROPS),
       objectT({ test: integerT() }, ADD_PROPS)
     ])

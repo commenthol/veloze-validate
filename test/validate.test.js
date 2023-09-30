@@ -4,6 +4,7 @@ import {
   numberT,
   integerT,
   stringT,
+  dateT,
   enumT,
   arrayT,
   objectT,
@@ -119,6 +120,53 @@ describe('function/validate', function () {
       equal(integerT()(true), false)
       equal(integerT()('1.23'), false)
       equal(integerT()(null), false)
+    })
+  })
+
+  describe('dateT', function () {
+    it('fails if min is greater max', function () {
+      assert.throws(() => {
+        dateT({ min: 10, max: 1 })
+      }, /RangeError: min, max issue/)
+    })
+
+    it('date validation', function () {
+      equal(dateT(REQUIRED)(), false)
+      equal(dateT(REQUIRED)(new Date()), true)
+      equal(dateT({ ...REQUIRED, min: 1 })(''), false)
+      equal(dateT()(), true)
+
+      equal(dateT({ min: 2 })(new Date()), true)
+      let e = {}
+      equal(dateT({ min: 2 })(new Date(0), e), false)
+      equal(e.message, 'date less than min=1970-01-01T00:00:00.002Z')
+
+      equal(dateT({ min: 2, exclusiveMin: true })(new Date()), true)
+      e = {}
+      equal(dateT({ min: 2, exclusiveMin: true })(new Date(2), e), false)
+      equal(e.message, 'date less equal than min=1970-01-01T00:00:00.002Z')
+
+      equal(dateT({ max: 2 })(new Date(0)), true)
+      e = {}
+      equal(dateT({ max: 2 })(new Date(), e), false)
+      equal(e.message, 'date greater than max=1970-01-01T00:00:00.002Z')
+      e = {}
+      equal(dateT({ max: 2, exclusiveMax: true })(new Date(2), e), false)
+      equal(e.message, 'date greater equal than max=1970-01-01T00:00:00.002Z')
+
+      equal(dateT()(true), false)
+      equal(dateT()(1.23), false)
+      equal(dateT()(null), false)
+    })
+
+    it('custom validation', function () {
+      const schema = dateT({
+        validate: (v) => v.toISOString() === new Date(0).toISOString()
+      })
+      equal(schema(new Date(0)), true)
+      const e = {}
+      equal(schema(new Date(1e3), e), false)
+      equal(e.message, 'date validate failed')
     })
   })
 

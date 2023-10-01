@@ -1,8 +1,9 @@
-# 0.1.0 (2023-09-30)
+# 0.1.0 (2023-10-01)
 
 ### feat:
 
-- add dateT validation (#915ffab)
+- conversion to JSON schema (#c8c743a)
+- add dateT validation (#75d658f)
 - validation for primitives, objects and array (#9f7dbc5)
 
 ### fix:

@@ -22,11 +22,15 @@ Less than 6k if minimized.
   * [numberT()](#numbert)
   * [integerT()](#integert)
   * [stringT()](#stringt)
+    * [stringDateTimeT()](#stringdatetimet)
+    * [stringUrlT()](#stringurlt)
+    * [stringUuidT()](#stringuuidt)
   * [enumT()](#enumt)
   * [arrayT()](#arrayt)
   * [objectT()](#objectt)
   * [oneOf()](#oneof)
   * [anyOf()](#anyof)
+  * [toJsonSchema()](#tojsonschema)
 * [License](#license)
 
 <!-- toc! -->
@@ -56,7 +60,7 @@ import {
 } from '@veloze/validate'
 
 // alternatively
-import { types as t, oneOf, allOf } from '@veloze/validate'
+import { type as t, oneOf, allOf } from '@veloze/validate'
 // then use `t.boolean()` instead of `booleanT()` aso...
 
 const schema = objectT(
@@ -259,9 +263,9 @@ export function stringT(
 
 For string format validation the following functions are provided:
 
-- validateDateTime: Date-time checks
-- validateUrl: URL checks
-- validateUuid: UUID checks
+- _validateDateTime_: Date-time checks
+- _validateUrl_: URL checks
+- _validateUuid_: UUID checks
 
 _usage_
 
@@ -285,10 +289,31 @@ schema('abc') // true
 schema('bcd') // false
 
 // string format URL check using validateUrl
-const schema = stringT({ validate: validateUrl })
+const schema = stringT({ validate: validateUrl})
 schema('https://foo.bar', true)
 schema('/foo.bar', false)
 ```
+
+### stringDateTimeT()
+
+String validation for date-time strings. Uses validateDateTime() validate function.
+
+### stringUrlT()
+
+String validation for URL strings. Uses validateUrl() validate function.
+
+_usage_
+
+```js
+const schema = stringUrlT()
+schema('https://foo.bar', true)
+schema('/foo.bar', false)
+```
+
+### stringUuidT()
+
+String validation for UUID strings. Uses validateUuid() validate function.
+
 
 ## enumT()
 
@@ -449,10 +474,47 @@ schema({ num: 0 }) // true
 schema({ str: '', num: 0 }) // true
 ```
 
+## toJsonSchema()
+
+A schema can be exported to JSON schema except 
+
+- any custom validate functions
+- dateT() validator
+
+A conversion from JSON schema is not supported.
+
+_usage_
+
+```js
+import { toJsonSchema } from '@veloze/validator'
+
+const schema = oneOf([
+  objectT({
+    num: numbertT(),
+    str: stringT()
+  }),
+  booleanT()
+])
+
+toJsonSchema(object)
+// {
+//   oneOf: [
+//     {
+//       type: 'object',
+//       properties: {
+//         num: { type: 'number' },
+//         str: { type: 'string' }
+//       }
+//     },
+//     bool: { type: 'boolean' }
+//   ]
+// }
+```
+
 
 # License
 
-MIT licensed
+[MIT licensed](./LICENSE)
 
 [npm-badge]: https://badgen.net/npm/v/@veloze/validate
 [npm]: https://www.npmjs.com/package/@veloze/validate

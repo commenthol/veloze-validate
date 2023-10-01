@@ -4,6 +4,9 @@ import {
   numberT,
   integerT,
   stringT,
+  stringUrlT,
+  stringDateTimeT,
+  stringUuidT,
   dateT,
   enumT,
   arrayT,
@@ -18,7 +21,7 @@ import {
   not
 } from '../src/index.js'
 
-describe('function/validate', function () {
+describe('validate', function () {
   describe('REQUIRED', function () {
     it('shall not not extensible', function () {
       assert.throws(() => {
@@ -128,6 +131,29 @@ describe('function/validate', function () {
       assert.throws(() => {
         dateT({ min: 10, max: 1 })
       }, /RangeError: min, max issue/)
+    })
+
+    it('fails if min is not a date', function () {
+      assert.throws(
+        () => {
+          dateT({ min: 'abc' })
+        },
+        {
+          message: 'min is not a date'
+        }
+      )
+    })
+
+    it('fails if max is not a date', function () {
+      assert.throws(
+        () => {
+          dateT({ max: 'abc' })
+        },
+        {
+          name: 'TypeError',
+          message: 'max is not a date'
+        }
+      )
     })
 
     it('date validation', function () {
@@ -252,6 +278,33 @@ describe('function/validate', function () {
         ),
         false
       )
+      deepEqual(e, { message: 'string is not an uuid' })
+    })
+  })
+
+  describe('stringUrlT', function () {
+    it('url validation', function () {
+      equal(stringUrlT()('https://foo.bar/path?a=1?b=2'), true)
+      const e = {}
+      equal(stringUrlT()('/foo.bar/path', e), false)
+      deepEqual(e, { message: 'string is not an url' })
+    })
+  })
+
+  describe('stringDateTimeT', function () {
+    it('date validation', function () {
+      equal(stringDateTimeT()('2020-12-01'), true)
+      const e = {}
+      equal(stringDateTimeT()('/foo.bar/path', e), false)
+      deepEqual(e, { message: 'string is not a date-time' })
+    })
+  })
+
+  describe('stringUuidT', function () {
+    it('uuid validation', function () {
+      equal(stringUuidT()('641663d3-4689-4ab0-842d-11fe8bfcfb17'), true)
+      const e = {}
+      equal(stringUuidT()('641663d3-4689-4ab0-842x-11fe8bfcfb17', e), false)
       deepEqual(e, { message: 'string is not an uuid' })
     })
   })

@@ -247,8 +247,15 @@ export const stringT = (opts) => {
     }
     return true
   }
-
-  Object.assign(_stringT, { ...opts, type: 'string' })
+  const format =
+    validate === validateDateTime
+      ? 'date-time'
+      : validate === validateUrl
+        ? 'url'
+        : validate === validateUuid
+          ? 'uuid'
+          : undefined
+  Object.assign(_stringT, { ...opts, format, type: 'string' })
   return _stringT
 }
 
@@ -267,6 +274,17 @@ export const validateUrl = (string, e = {}) => {
 }
 
 /**
+ * @param {{
+ *  required?: boolean
+ *  min?: number
+ *  max?: number
+ * }} [opts]
+ * @returns {(v: any, e: ValidationFailure) => boolean}
+ */
+export const stringUrlT = (opts) =>
+  stringT({ ...opts, pattern: undefined, validate: validateUrl })
+
+/**
  * @param {string} string
  * @param {ValidationFailure} [e]
  * @returns {boolean}
@@ -279,6 +297,17 @@ export const validateDateTime = (string, e = {}) => {
   }
   return true
 }
+
+/**
+ * @param {{
+ *  required?: boolean
+ *  min?: number
+ *  max?: number
+ * }} [opts]
+ * @returns {(v: any, e: ValidationFailure) => boolean}
+ */
+export const stringDateTimeT = (opts) =>
+  stringT({ ...opts, pattern: undefined, validate: validateDateTime })
 
 /**
  * a not so strict UUID check (does not check for uuid version byte)
@@ -300,7 +329,18 @@ export const validateUuid = (string, e = {}) => {
 }
 
 /**
- * @param {any[]} list
+ * @param {{
+ *  required?: boolean
+ *  min?: number
+ *  max?: number
+ * }} [opts]
+ * @returns {(v: any, e: ValidationFailure) => boolean}
+ */
+export const stringUuidT = (opts) =>
+  stringT({ ...opts, pattern: undefined, validate: validateUuid })
+
+/**
+ * @param {(string|number|boolean)[]} list
  * @param {{
  *  required?: boolean
  * }} [opts ]
@@ -545,6 +585,9 @@ export const type = {
   number: numberT,
   integer: integerT,
   string: stringT,
+  stringUrl: stringUrlT,
+  stringDateTime: stringDateTimeT,
+  stringUuid: stringUuidT,
   date: dateT,
   enum: enumT,
   array: arrayT,

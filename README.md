@@ -520,4 +520,4 @@ toJsonSchema(object)
 [npm]: https://www.npmjs.com/package/@veloze/validate
 [types-badge]: https://badgen.net/npm/types/@veloze/validate
 [actions-badge]: https://github.com/commenthol/veloze-validate/workflows/CI/badge.svg?branch=main&event=push
-[actions]: https://github.com/commenthol/veloze-jwt/actions/workflows/ci.yml?query=branch%3Amain
+[actions]: https://github.com/commenthol/veloze-validate/actions/workflows/ci.yml?query=branch%3Amain

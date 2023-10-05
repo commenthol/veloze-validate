@@ -40,6 +40,14 @@ describe('validate', function () {
       equal(booleanT(REQUIRED)(false), true)
     })
 
+    it('cast boolean from string', function () {
+      equal(booleanT({ cast: true })('true'), true)
+      equal(booleanT({ cast: true })('false'), true)
+      equal(booleanT({ cast: true })('string'), false)
+      equal(booleanT({ cast: true })(true), true)
+      equal(booleanT({ cast: true })(false), true)
+    })
+
     it('custom validate', function () {
       const schema = booleanT({ validate: (v) => v === true })
       const e = {}
@@ -91,6 +99,16 @@ describe('validate', function () {
       equal(e.message, 'not a number')
       equal(numberT()('1.23'), false)
       equal(numberT()(null), false)
+    })
+
+    it('cast number from string', function () {
+      equal(numberT({ cast: true })('12'), true)
+      equal(numberT({ cast: true })('-3.14'), true)
+      equal(numberT({ cast: true })('string'), false)
+      equal(numberT({ cast: true })([]), false)
+      equal(numberT({ cast: true })({}), false)
+      equal(numberT({ cast: true })(true), false)
+      equal(numberT({ cast: true })(false), false)
     })
 
     it('custom validate', function () {

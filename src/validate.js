@@ -31,16 +31,20 @@ export const ADD_PROPS = Object.freeze({ additionalProperties: true })
 /**
  * @param {{
  *  required?: boolean
+ *  cast?: boolean
  *  validate?: (v: boolean, e?: ValidationFailure) => boolean
  * }} [opts]
  * @returns {ValidationFn}
  */
 export const booleanT = (opts) => {
-  const { required = false, validate } = opts || {}
+  const { required = false, cast = false, validate } = opts || {}
 
   const _booleanT = (v, e = {}) => {
     if (!required && v === undefined) {
       return true
+    }
+    if (cast && (v === 'true' || v === 'false')) {
+      v = v === 'true'
     }
     if (typeof v !== 'boolean') {
       e.message = 'not a boolean'
@@ -60,6 +64,7 @@ export const booleanT = (opts) => {
 /**
  * @param {{
  *  required?: boolean
+ *  cast?: boolean
  *  min?: number
  *  max?: number
  *  exclusiveMin?: boolean
@@ -71,6 +76,7 @@ export const booleanT = (opts) => {
 export const numberT = (opts) => {
   const {
     required = false,
+    cast = false,
     min = -Infinity,
     max = Infinity,
     exclusiveMin = false,
@@ -84,6 +90,9 @@ export const numberT = (opts) => {
   const _numberT = (v, e = {}) => {
     if (!required && v === undefined) {
       return true
+    }
+    if (cast && typeof v === 'string' && !isNaN(Number(v))) {
+      v = Number(v)
     }
     if (typeof v !== 'number') {
       e.message = 'not a number'
@@ -113,6 +122,7 @@ export const numberT = (opts) => {
 /**
  * @param {{
  *  required?: boolean
+ *  cast?: boolean
  *  min?: number
  *  max?: number
  *  exclusiveMin?: boolean

@@ -49,10 +49,12 @@ export const ADD_PROPS: Readonly<{
 }>;
 export function booleanT(opts?: {
     required?: boolean | undefined;
+    cast?: boolean | undefined;
     validate?: ((v: boolean, e?: ValidationFailure) => boolean) | undefined;
 } | undefined): ValidationFn;
 export function numberT(opts?: {
     required?: boolean | undefined;
+    cast?: boolean | undefined;
     min?: number | undefined;
     max?: number | undefined;
     exclusiveMin?: boolean | undefined;
@@ -61,6 +63,7 @@ export function numberT(opts?: {
 } | undefined): ValidationFn;
 export function integerT(opts?: {
     required?: boolean | undefined;
+    cast?: boolean | undefined;
     min?: number | undefined;
     max?: number | undefined;
     exclusiveMin?: boolean | undefined;

@@ -1,3 +1,17 @@
+# 0.2.0 (2023-10-05)
+
+### feat:
+
+- cast boolean and numeric values from string types (#c168687)
+
+### docs:
+
+- fix badge (#d3b2bc9)
+
+### chore:
+
+- github actions (#00f503b)
+
 # 0.1.0 (2023-10-01)
 
 ### feat:

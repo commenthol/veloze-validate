@@ -9,7 +9,7 @@
 Easy type validator with type validation functions.
 The validator bails out on first encountered schema violation.
 
-Less than 6k if minimized.
+Less than 7k if minimized.
 
 **Table of Contents**
 
@@ -31,6 +31,7 @@ Less than 6k if minimized.
   * [oneOf()](#oneof)
   * [anyOf()](#anyof)
   * [toJsonSchema()](#tojsonschema)
+  * [cast()](#cast)
 * [License](#license)
 
 <!-- toc! -->
@@ -56,7 +57,7 @@ import {
   oneOf,
   anyOf,
   REQUIRED, // == { required: true }
-  ADD_PROPS, // == { additionalProperties: true }
+  ADD_PROPS // == { additionalProperties: true }
 } from '@veloze/validate'
 
 // alternatively
@@ -73,15 +74,15 @@ const schema = objectT(
     obj: objectT(
       {
         // required nested object with
-        nested: stringT(), // optional string
+        nested: stringT() // optional string
       },
       REQUIRED
     ),
     any: anyOf([
       // either or both
       objectT({ flag: booleanT() }, ADD_PROPS),
-      objectT({ test: integerT() }, ADD_PROPS),
-    ]),
+      objectT({ test: integerT() }, ADD_PROPS)
+    ])
   },
   { ...REQUIRED, additionalProperties: true }
 )
@@ -289,7 +290,7 @@ schema('abc') // true
 schema('bcd') // false
 
 // string format URL check using validateUrl
-const schema = stringT({ validate: validateUrl})
+const schema = stringT({ validate: validateUrl })
 schema('https://foo.bar', true)
 schema('/foo.bar', false)
 ```
@@ -313,7 +314,6 @@ schema('/foo.bar', false)
 ### stringUuidT()
 
 String validation for UUID strings. Uses validateUuid() validate function.
-
 
 ## enumT()
 
@@ -410,7 +410,7 @@ _usage_
 ````js
 const subschema = {
   num: numberT({ min: 0, max: 100, exclusiveMax: true }),
-  str: stringT(REQUIRED),
+  str: stringT(REQUIRED)
 }
 const schema = objectT(subschema, { ...REQUIRED, ...ADD_PROPS, min: 1 })
 
@@ -462,7 +462,7 @@ _usage_
 // object must either contain { str: string } or { num: number } or both
 const schema = anyOf([
   objectT({ str: stringT(REQUIRED) }, ADD_PROPS),
-  objectT({ num: numberT(REQUIRED) }, ADD_PROPS),
+  objectT({ num: numberT(REQUIRED) }, ADD_PROPS)
 ])
 
 schema({}, failure) // false
@@ -476,7 +476,7 @@ schema({ str: '', num: 0 }) // true
 
 ## toJsonSchema()
 
-A schema can be exported to JSON schema except 
+A schema can be exported to JSON schema except
 
 - any custom validate functions
 - dateT() validator
@@ -511,6 +511,30 @@ toJsonSchema(object)
 // }
 ```
 
+## cast()
+
+Casts validated values from schema.
+
+_usage_
+
+```js
+import { booleanT, numberT, cast } from '@veloze/validate'
+
+const schema = oneOf([
+  booleanT({ cast: true }), 
+  numberT({ cast: true })
+])
+const castValues = cast(schema)
+
+const checkValue = 'false'
+// first validate...
+const isValid = schema(checkValue)
+// ... if `true` then cast
+if (isValid) {
+  const value = castValues(checkValue)
+  // value === false
+}
+```
 
 # License
 

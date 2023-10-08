@@ -94,6 +94,7 @@ export function stringUrlT(opts?: {
 export function validateDateTime(string: string, e?: ValidationFailure | undefined): boolean;
 export function stringDateTimeT(opts?: {
     required?: boolean | undefined;
+    cast?: boolean | undefined;
     min?: number | undefined;
     max?: number | undefined;
 } | undefined): (v: any, e: ValidationFailure) => boolean;

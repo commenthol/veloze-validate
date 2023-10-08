@@ -309,8 +309,10 @@ export const validateDateTime = (string, e = {}) => {
 }
 
 /**
+ * - opts.cast: if `true` allow casting string to type Date
  * @param {{
  *  required?: boolean
+ *  cast?: boolean
  *  min?: number
  *  max?: number
  * }} [opts]

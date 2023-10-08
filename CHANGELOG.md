@@ -1,3 +1,17 @@
+# 0.3.0 (2023-10-08)
+
+### feat:
+
+- cast values from schema (#2388d1b)
+
+### fix:
+
+- ignore date type in toJsonSchema (#1f2f612)
+
+### docs:
+
+- fix anyOf documentation (#ae8cdce)
+
 # 0.2.0 (2023-10-05)
 
 ### feat:

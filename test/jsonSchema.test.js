@@ -59,6 +59,10 @@ describe('jsonSchema', function () {
     )
   })
 
+  it('shall ignore date', function () {
+    deepEqual(toJsonSchema(t.date()), undefined)
+  })
+
   it('convert string', function () {
     deepEqual(toJsonSchema(t.string()), {
       type: 'string'

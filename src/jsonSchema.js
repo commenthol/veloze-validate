@@ -1,6 +1,6 @@
-const json = (v) => JSON.parse(JSON.stringify(v))
-
 /** @typedef {import('./validate.js').ValidationFn} ValidationFn */
+
+const json = (v) => JSON.parse(JSON.stringify(v))
 
 /**
  * convert validation to json schema;
@@ -32,6 +32,10 @@ export const toJsonSchema = (schema) => {
         exclusiveMin,
         exclusiveMax
       })
+    }
+    case 'date': {
+      // no JSON schema type available
+      return
     }
     case 'string': {
       const { required, format, min, max, pattern } = schema
@@ -97,6 +101,7 @@ export const toJsonSchema = (schema) => {
       }
     }
     default: {
+      // TODO: make extensible!
       throw new TypeError(`unknown schema type=${type}`)
     }
   }

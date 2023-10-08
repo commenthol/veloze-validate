@@ -54,13 +54,13 @@ import {
   arrayT,
   objectT,
   oneOf,
-  allOf,
+  anyOf,
   REQUIRED, // == { required: true }
   ADD_PROPS, // == { additionalProperties: true }
 } from '@veloze/validate'
 
 // alternatively
-import { type as t, oneOf, allOf } from '@veloze/validate'
+import { type as t, oneOf, anyOf } from '@veloze/validate'
 // then use `t.boolean()` instead of `booleanT()` aso...
 
 const schema = objectT(
@@ -77,7 +77,7 @@ const schema = objectT(
       },
       REQUIRED
     ),
-    any: allOf([
+    any: anyOf([
       // either or both
       objectT({ flag: booleanT() }, ADD_PROPS),
       objectT({ test: integerT() }, ADD_PROPS),
@@ -102,7 +102,7 @@ console.log(valid, e)
 e = {}
 valid = schema({ any: { flag: true, test: '1' }, obj: {} }, e)
 console.log('%s %j', valid, e)
-// false {"path":["any"],"failures":[{"path":["test"],"message":"not a number"}],"message":"allOf failed"}
+// false {"path":["any"],"failures":[{"path":["test"],"message":"not a number"}],"message":"anyOf failed"}
 ```
 
 # API

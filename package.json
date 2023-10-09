@@ -27,7 +27,8 @@
     "coverage": "c8 -r html -r text npm t",
     "lint": "eslint --ext js .",
     "test": "mocha",
-    "types": "rm -rf types; tsc"
+    "types": "rm -rf types; tsc",
+    "size": "terser -cm -o x.js src/validate.js ; ls -al x.js ; gzip -f x.js ; ls -al x.js.gz ; rm x.js.gz"
   },
   "mocha": {
     "recursive": true

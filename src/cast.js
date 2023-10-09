@@ -2,18 +2,18 @@ import { validateDateTime } from './validate.js'
 
 /** @typedef {import('./validate.js').ValidationFn} ValidationFn */
 
-const booleanCast = (v) => (v === 'true' || v === 'false' ? v === 'true' : v)
+const booleanCoerce = (v) => (v === 'true' || v === 'false' ? v === 'true' : v)
 
-const numberCast = (v) =>
+const numberCoerce = (v) =>
   typeof v === 'string' && !isNaN(Number(v)) ? Number(v) : v
 
-const anyCast = (v) => v
+const noCoerce = (v) => v
 
-const stringDateTimeCast = (v) => new Date(v)
+const stringDateTimeCoerce = (v) => new Date(v)
 
-const arrayCast = (schema) => (v) => Array.isArray(v) ? v.map(cast(schema)) : v
+const arrayCoerce = (schema) => (v) => Array.isArray(v) ? v.map(cast(schema)) : v
 
-const objectCast = (schema) => (v) => {
+const objectCoerce = (schema) => (v) => {
   if (!v) return v
   const obj = {}
   for (const [prop, value] of Object.entries(v)) {
@@ -28,10 +28,10 @@ const objectCast = (schema) => (v) => {
   return obj
 }
 
-const oneOrAnyOfCast = (schemas) => (v) => {
+const oneOrAnyOfCoerce = (schemas) => (v) => {
   // obtain first applicable schema
   for (const schema of schemas) {
-    if (schema(v)) {
+    if (schema.validate(v)) {
       return cast(schema)(v)
     }
   }
@@ -41,36 +41,36 @@ const oneOrAnyOfCast = (schemas) => (v) => {
 /**
  * cast values by schema
  * @param {ValidationFn | any} schema
- * @param {ValidationFn | any} [other]
  * @returns {(any) => any}
  */
-export function cast (schema, other) {
-  const { type, cast, validate } = schema
+export function cast (schema) {
+  const { type, format, coerce, _cast, _validate } = schema
+
+  if (_cast && typeof coerce === 'function') {
+    return (v) => schema.coerce(v)
+  }
 
   switch (type) {
     case 'boolean':
-      return cast ? booleanCast : anyCast
+      return _cast ? booleanCoerce : noCoerce
     case 'integer':
     case 'number':
-      return cast ? numberCast : anyCast
+      return _cast ? numberCoerce : noCoerce
     case 'string':
-      return cast && validate === validateDateTime
-        ? stringDateTimeCast
-        : anyCast
+      return _cast && (_validate === validateDateTime || format === 'date-time')
+        ? stringDateTimeCoerce
+        : noCoerce
     case 'date':
     case 'enum':
-      return anyCast
+      return noCoerce
     case 'array':
-      return arrayCast(schema.schema)
+      return arrayCoerce(schema._schema)
     case 'object':
-      return objectCast(schema.schema)
+      return objectCoerce(schema._schema)
     case 'oneOf':
     case 'anyOf':
-      return oneOrAnyOfCast(schema.schemas)
+      return oneOrAnyOfCoerce(schema._schemas)
     default:
-      if (other) {
-        return other(schema)
-      }
       throw new TypeError(`unknown schema type=${type}`)
   }
 }

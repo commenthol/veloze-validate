@@ -1,16 +1,4 @@
 /**
- * Data must be valid against exactly one of the given schemas.
- * @param {ValidationFn[]} schemas
- * @returns {ValidationFn}
- */
-export function oneOf(schemas: ValidationFn[]): ValidationFn;
-/**
- * Data must be valid against any (one or more) of the given schemas
- * @param {ValidationFn[]} schemas
- * @returns {ValidationFn}
- */
-export function anyOf(schemas: ValidationFn[]): ValidationFn;
-/**
  * not() turns an allow-list into a block-list.
  * This is explicitly not supported here as to enforce secure defaults.
  * If you know what you do, write your own not().
@@ -47,11 +35,64 @@ export const REQUIRED: Readonly<{
 export const ADD_PROPS: Readonly<{
     additionalProperties: true;
 }>;
+export class BaseT {
+    /** @type {boolean|undefined} */
+    _required: boolean | undefined;
+    /** @type {boolean|undefined} */
+    _cast: boolean | undefined;
+    /** @type {number|undefined} */
+    _min: number | undefined;
+    /** @type {number|undefined} */
+    _max: number | undefined;
+    /** @type {boolean|undefined} */
+    _exclusiveMin: boolean | undefined;
+    /** @type {boolean|undefined} */
+    _exclusiveMax: boolean | undefined;
+    required(): this;
+    cast(): this;
+    /**
+     * @param {number} min
+     * @returns {this}
+     */
+    min(min: number): this;
+    /**
+     * @param {number} max
+     * @returns {this}
+     */
+    max(max: number): this;
+    /**
+     * @param {ValidationFn} validateFn
+     * @returns {this}
+     */
+    custom(validateFn: ValidationFn): this;
+    _validate: ValidationFn | undefined;
+}
+export class BooleanT extends BaseT {
+    constructor(opts: any);
+    type: string;
+    /** @type {((v: boolean, e?: ValidationFailure) => boolean)|undefined} */
+    _validate: ((v: boolean, e?: ValidationFailure) => boolean) | undefined;
+    /**
+     * @param {any} v
+     * @param {ValidationFailure} [e]
+     * @returns {boolean}
+     */
+    validate(v: any, e?: ValidationFailure | undefined): boolean;
+}
 export function booleanT(opts?: {
     required?: boolean | undefined;
     cast?: boolean | undefined;
-    validate?: ((v: boolean, e?: ValidationFailure) => boolean) | undefined;
-} | undefined): ValidationFn;
+    validate?: ((v: number, e?: ValidationFailure) => boolean) | undefined;
+} | undefined): BooleanT;
+export class NumberT extends BaseT {
+    constructor(opts: any);
+    type: string;
+    /** @type {((v: number, e?: ValidationFailure) => boolean)|undefined} */
+    _validate: ((v: number, e?: ValidationFailure) => boolean) | undefined;
+    validate(v: any, e?: {}): boolean;
+    exclusiveMin(): this;
+    exclusiveMax(): this;
+}
 export function numberT(opts?: {
     required?: boolean | undefined;
     cast?: boolean | undefined;
@@ -60,7 +101,11 @@ export function numberT(opts?: {
     exclusiveMin?: boolean | undefined;
     exclusiveMax?: boolean | undefined;
     validate?: ((v: number, e?: ValidationFailure) => boolean) | undefined;
-} | undefined): ValidationFn;
+} | undefined): NumberT;
+export class IntegerT extends NumberT {
+    _min: number;
+    _max: number;
+}
 export function integerT(opts?: {
     required?: boolean | undefined;
     cast?: boolean | undefined;
@@ -69,7 +114,23 @@ export function integerT(opts?: {
     exclusiveMin?: boolean | undefined;
     exclusiveMax?: boolean | undefined;
     validate?: ((v: number, e?: ValidationFailure) => boolean) | undefined;
-} | undefined): ValidationFn;
+} | undefined): IntegerT;
+export function toDate(v: any): Date | undefined;
+export class DateT extends NumberT {
+    /** @type {((v: Date, e?: ValidationFailure) => boolean)|undefined} */
+    _validate: ((v: Date, e?: ValidationFailure) => boolean) | undefined;
+    _minMax(min: any, max: any): this;
+    /**
+     * @override
+     * @param {Date|number} min
+     */
+    override min(min: Date | number): this;
+    /**
+     * @override
+     * @param {Date|number} max
+     */
+    override max(max: Date | number): this;
+}
 export function dateT(opts?: {
     required?: boolean | undefined;
     min?: string | number | Date | undefined;
@@ -77,42 +138,83 @@ export function dateT(opts?: {
     exclusiveMin?: boolean | undefined;
     exclusiveMax?: boolean | undefined;
     validate?: ((v: Date, e?: ValidationFailure) => boolean) | undefined;
-} | undefined): (v: any, e: ValidationFailure) => boolean;
+} | undefined): DateT;
+export class StringT extends BaseT {
+    constructor(opts: any);
+    type: string;
+    _min: number;
+    _max: number;
+    /** @type {RegExp|undefined} */
+    _pattern: RegExp | undefined;
+    /** @type {((v: string, e?: ValidationFailure) => boolean)|undefined} */
+    _validate: ((v: string, e?: ValidationFailure) => boolean) | undefined;
+    _minMax(min: any, max: any): this;
+    validate(v: any, e?: {}): boolean;
+    /**
+     * @param {number} min
+     */
+    min(min: number): this;
+    /**
+     * @param {number} max
+     */
+    max(max: number): this;
+    url(): this;
+    format: string | undefined;
+    uuid(): this;
+    _minLength: any;
+    _maxLength: any;
+    dateTime(): this;
+    /**
+     * @param {RegExp} pattern
+     */
+    pattern(pattern: RegExp): this;
+}
 export function stringT(opts?: {
     required?: boolean | undefined;
     min?: number | undefined;
     max?: number | undefined;
     pattern?: RegExp | undefined;
     validate?: ((v: string, e?: ValidationFailure) => boolean) | undefined;
-} | undefined): (v: any, e: ValidationFailure) => boolean;
+} | undefined): StringT;
 export function validateUrl(string: string, e?: ValidationFailure | undefined): boolean;
-export function stringUrlT(opts?: {
-    required?: boolean | undefined;
-    min?: number | undefined;
-    max?: number | undefined;
-} | undefined): (v: any, e: ValidationFailure) => boolean;
 export function validateDateTime(string: string, e?: ValidationFailure | undefined): boolean;
-export function stringDateTimeT(opts?: {
-    required?: boolean | undefined;
-    cast?: boolean | undefined;
-    min?: number | undefined;
-    max?: number | undefined;
-} | undefined): (v: any, e: ValidationFailure) => boolean;
 export function validateUuid(string: string, e?: ValidationFailure | undefined): boolean;
-export function stringUuidT(opts?: {
-    required?: boolean | undefined;
-    min?: number | undefined;
-    max?: number | undefined;
-} | undefined): (v: any, e: ValidationFailure) => boolean;
+export class EnumT extends BaseT {
+    constructor(list: any, opts: any);
+    type: string;
+    _list: any[];
+    validate(v: any, e?: {}): boolean;
+}
 export function enumT(list: (string | number | boolean)[], opts?: {
     required?: boolean | undefined;
-} | undefined): ValidationFn;
+} | undefined): EnumT;
+export class ArrayT extends BaseT {
+    constructor(schema: any, opts: any);
+    type: string;
+    _min: number;
+    _max: number;
+    /** @type {((v: any[], e?: ValidationFailure) => boolean)|undefined} */
+    _validate: ((v: any[], e?: ValidationFailure) => boolean) | undefined;
+    _schema: any;
+    validate(v: any, e?: {}): boolean;
+}
 export function arrayT(schema: ValidationFn, opts?: {
     required?: boolean | undefined;
     min?: number | undefined;
     max?: number | undefined;
     validate?: ((v: any[], e: ValidationFailure) => boolean) | undefined;
-} | undefined): (v: any, e: ValidationFailure) => boolean;
+} | undefined): ArrayT;
+export class ObjectT extends BaseT {
+    constructor(schema: any, opts: any);
+    type: string;
+    _min: number;
+    _max: number;
+    /** @type {boolean|undefined} */
+    _additionalProperties: boolean | undefined;
+    _schema: any;
+    validate(v: any, e?: {}): boolean;
+    additionalProperties(): this;
+}
 export function objectT(schema: {
     [key: string]: ValidationFn;
 }, opts?: {
@@ -121,20 +223,40 @@ export function objectT(schema: {
     max?: number | undefined;
     additionalProperties?: boolean | undefined;
     validate?: ((v: object, e?: ValidationFailure) => boolean) | undefined;
-} | undefined): ValidationFn;
+} | undefined): ObjectT;
+export class OneOf {
+    constructor(schemas: any);
+    type: string;
+    _schemas: any[];
+    validate(v: any, e?: {}): boolean;
+}
+export function oneOf(schemas: ValidationFn[]): OneOf;
+export class AnyOf {
+    constructor(schemas: any);
+    type: string;
+    _schemas: any[];
+    validate(v: any, e?: {}): boolean;
+}
+export function anyOf(schemas: ValidationFn[]): AnyOf;
 export namespace type {
     export { booleanT as boolean };
     export { numberT as number };
     export { integerT as integer };
     export { stringT as string };
-    export { stringUrlT as stringUrl };
-    export { stringDateTimeT as stringDateTime };
-    export { stringUuidT as stringUuid };
     export { dateT as date };
     export { enumT as enum };
     export { arrayT as array };
     export { objectT as object };
 }
+export type Options = {
+    required?: boolean | undefined;
+    cast?: boolean | undefined;
+    validate?: ((v: number, e?: ValidationFailure) => boolean) | undefined;
+    min?: number | undefined;
+    max?: number | undefined;
+    exclusiveMin?: boolean | undefined;
+    exclusiveMax?: boolean | undefined;
+};
 export type ValidationFailure = {
     message?: string;
     path?: string[];

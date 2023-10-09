@@ -5,13 +5,13 @@ import {
   numberT,
   integerT,
   stringT,
-  stringDateTimeT,
   enumT,
   arrayT,
   objectT,
   oneOf,
   anyOf,
-  dateT
+  dateT,
+  StringT
 } from '../src/index.js'
 
 describe('cast', function () {
@@ -70,7 +70,7 @@ describe('cast', function () {
 
   describe('string', function () {
     it('shall cast stringDateTimeT', function () {
-      const schema = stringDateTimeT({ cast: true })
+      const schema = stringT().cast().dateTime()
       deepEqual(
         cast(schema)('1900-01-01T00:00:00Z'),
         new Date('1900-01-01T00:00:00Z')
@@ -78,7 +78,7 @@ describe('cast', function () {
     })
 
     it('shall not cast stringDateTimeT', function () {
-      const schema = stringDateTimeT({ cast: false })
+      const schema = stringT().dateTime()
       equal(cast(schema)('1900-01-01T00:00:00Z'), '1900-01-01T00:00:00Z')
     })
 
@@ -198,21 +198,16 @@ describe('cast', function () {
 
   describe('extension', function () {
     it('shall cast', function () {
-      const regexT = () => {
-        const _regexT = () => true
-        Object.assign(_regexT, { type: 'regex' })
-        return _regexT
-      }
-      const castRegex = (schema) => {
-        if (schema?.type === 'regex') {
-          return (v) => new RegExp(v)
+      class RegExpT extends StringT {
+        coerce (v) {
+          return new RegExp(v)
         }
       }
 
-      const schema = regexT()
+      const schema = new RegExpT().cast()
       deepEqual(
-        cast(schema, castRegex)('hi'),
-        /hi/
+        cast(schema)('^hi'),
+        /^hi/
       )
     })
   })

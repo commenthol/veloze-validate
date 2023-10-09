@@ -1,6 +1,6 @@
 /** @typedef {import('./validate.js').ValidationFn} ValidationFn */
 
-const json = (v) => JSON.parse(JSON.stringify(v))
+export const json = (v) => JSON.parse(JSON.stringify(v))
 
 /**
  * convert validation to json schema;
@@ -15,22 +15,22 @@ export const toJsonSchema = (schema) => {
 
   switch (type) {
     case 'boolean': {
-      const { required } = schema
+      const { _required } = schema
       return json({
         type,
-        required
+        required: _required
       })
     }
     case 'integer':
     case 'number': {
-      const { required, min, max, exclusiveMin, exclusiveMax } = schema
+      const { _required, _min, _max, _exclusiveMin, _exclusiveMax } = schema
       return json({
         type,
-        required,
-        minimum: min,
-        maximum: max,
-        exclusiveMin,
-        exclusiveMax
+        required: _required,
+        minimum: _min === Number.MIN_SAFE_INTEGER ? undefined : _min,
+        maximum: _max === Number.MAX_SAFE_INTEGER ? undefined : _max,
+        exclusiveMin: _exclusiveMin,
+        exclusiveMax: _exclusiveMax
       })
     }
     case 'date': {
@@ -38,50 +38,50 @@ export const toJsonSchema = (schema) => {
       return
     }
     case 'string': {
-      const { required, format, min, max, pattern } = schema
+      const { _required, format, _min, _max, _pattern } = schema
       return json({
         type,
         format,
-        required,
-        minLength: min,
-        maxLength: max,
-        pattern: pattern?.source
+        required: _required,
+        minLength: _min,
+        maxLength: _max,
+        pattern: _pattern?.source
       })
     }
     case 'enum': {
-      const { required, list } = schema
+      const { _required, _list } = schema
       return json({
-        enum: list,
-        required
+        enum: _list,
+        required: _required
       })
     }
     case 'array': {
-      const { required, min, max, schema: subschema } = schema
+      const { _required, _min, _max, _schema } = schema
       const out = json({
         type,
-        required,
-        minItems: min,
-        maxItems: max
+        required: _required,
+        minItems: _min,
+        maxItems: _max
       })
-      out.items = toJsonSchema(subschema)
+      out.items = toJsonSchema(_schema)
       return out
     }
     case 'object': {
       const {
-        required,
-        min,
-        max,
-        additionalProperties,
-        schema: subschema
+        _required,
+        _min,
+        _max,
+        _additionalProperties,
+        _schema
       } = schema
       const out = json({
         type,
-        required,
-        minProperties: min,
-        maxProperties: max,
-        additionalProperties
+        required: _required,
+        minProperties: _min,
+        maxProperties: _max,
+        additionalProperties: _additionalProperties
       })
-      out.properties = Object.entries(subschema).reduce(
+      out.properties = Object.entries(_schema).reduce(
         (curr, [prop, schema]) => {
           curr[prop] = toJsonSchema(schema)
           return curr
@@ -92,16 +92,18 @@ export const toJsonSchema = (schema) => {
     }
     case 'oneOf': {
       return {
-        oneOf: schema.schemas.map((subschema) => toJsonSchema(subschema))
+        oneOf: schema._schemas.map((subschema) => toJsonSchema(subschema))
       }
     }
     case 'anyOf': {
       return {
-        anyOf: schema.schemas.map((subschema) => toJsonSchema(subschema))
+        anyOf: schema._schemas.map((subschema) => toJsonSchema(subschema))
       }
     }
     default: {
-      // TODO: make extensible!
+      if (typeof schema.jsonSchema === 'function') {
+        return schema.jsonSchema()
+      }
       throw new TypeError(`unknown schema type=${type}`)
     }
   }

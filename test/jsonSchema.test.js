@@ -2,16 +2,13 @@ import assert, { deepEqual } from 'assert/strict'
 import {
   toJsonSchema,
   type as t,
-  stringUrlT,
-  stringDateTimeT,
-  stringUuidT,
   oneOf,
   anyOf,
   REQUIRED
 } from '../src/index.js'
 
 describe('jsonSchema', function () {
-  it('unkwnown schema shall throw', function () {
+  it('unknown schema shall throw', function () {
     assert.throws(
       () => {
         toJsonSchema({})
@@ -65,10 +62,14 @@ describe('jsonSchema', function () {
 
   it('convert string', function () {
     deepEqual(toJsonSchema(t.string()), {
-      type: 'string'
+      type: 'string',
+      minLength: 0,
+      maxLength: 255
     })
     deepEqual(toJsonSchema(t.string(REQUIRED)), {
       type: 'string',
+      minLength: 0,
+      maxLength: 255,
       required: true
     })
     deepEqual(toJsonSchema(t.string({ min: 2, max: 4 })), {
@@ -78,24 +79,32 @@ describe('jsonSchema', function () {
     })
     deepEqual(toJsonSchema(t.string({ pattern: /^foo\.bar/ })), {
       type: 'string',
+      minLength: 0,
+      maxLength: 255,
       pattern: '^foo\\.bar'
     })
   })
 
   it('convert string formats', function () {
-    deepEqual(toJsonSchema(stringUrlT()), {
+    deepEqual(toJsonSchema(t.string().url()), {
       type: 'string',
-      format: 'url'
+      format: 'url',
+      minLength: 0,
+      maxLength: 255
     })
 
-    deepEqual(toJsonSchema(stringDateTimeT()), {
+    deepEqual(toJsonSchema(t.string().dateTime()), {
       type: 'string',
-      format: 'date-time'
+      format: 'date-time',
+      minLength: 0,
+      maxLength: 255
     })
 
-    deepEqual(toJsonSchema(stringUuidT()), {
+    deepEqual(toJsonSchema(t.string().uuid()), {
       type: 'string',
-      format: 'uuid'
+      format: 'uuid',
+      minLength: 0,
+      maxLength: 255
     })
   })
 
@@ -112,6 +121,8 @@ describe('jsonSchema', function () {
   it('convert array', function () {
     deepEqual(toJsonSchema(t.array(t.number())), {
       type: 'array',
+      minItems: 0,
+      maxItems: 255,
       items: {
         type: 'number'
       }
@@ -119,9 +130,13 @@ describe('jsonSchema', function () {
     deepEqual(toJsonSchema(t.array(t.string(REQUIRED), REQUIRED)), {
       type: 'array',
       required: true,
+      minItems: 0,
+      maxItems: 255,
       items: {
         type: 'string',
-        required: true
+        required: true,
+        minLength: 0,
+        maxLength: 255
       }
     })
     deepEqual(toJsonSchema(t.array(t.string(), { min: 0, max: 5 })), {
@@ -129,7 +144,9 @@ describe('jsonSchema', function () {
       minItems: 0,
       maxItems: 5,
       items: {
-        type: 'string'
+        type: 'string',
+        minLength: 0,
+        maxLength: 255
       }
     })
   })
@@ -152,9 +169,13 @@ describe('jsonSchema', function () {
     deepEqual(toJsonSchema(t.object(schema, REQUIRED)), {
       type: 'object',
       required: true,
+      minProperties: 0,
+      maxProperties: 255,
       properties: {
         arr: {
           type: 'array',
+          minItems: 0,
+          maxItems: 255,
           items: {
             type: 'number'
           }
@@ -170,6 +191,8 @@ describe('jsonSchema', function () {
         },
         obj: {
           type: 'object',
+          minProperties: 0,
+          maxProperties: 255,
           properties: {
             nested: {
               type: 'integer'
@@ -179,7 +202,9 @@ describe('jsonSchema', function () {
         },
         str: {
           type: 'string',
-          required: true
+          required: true,
+          minLength: 0,
+          maxLength: 255
         }
       }
     })
@@ -188,14 +213,36 @@ describe('jsonSchema', function () {
   it('convert oneOf', function () {
     const schema = oneOf([t.number(), t.string()])
     deepEqual(toJsonSchema(schema), {
-      oneOf: [{ type: 'number' }, { type: 'string' }]
+      oneOf: [
+        { type: 'number' },
+        { type: 'string', minLength: 0, maxLength: 255 }
+      ]
     })
   })
 
   it('convert anyOf', function () {
     const schema = anyOf([t.number(), t.string()])
     deepEqual(toJsonSchema(schema), {
-      anyOf: [{ type: 'number' }, { type: 'string' }]
+      anyOf: [
+        { type: 'number' },
+        { type: 'string', minLength: 0, maxLength: 255 }
+      ]
     })
+  })
+
+  it('schema.jsonSchema', function () {
+    class AlwaysValid {
+      type = 'alwaysValid'
+      validate (_v) {
+        return true
+      }
+
+      jsonSchema () {
+        return { type: this.type }
+      }
+    }
+
+    const schema = new AlwaysValid()
+    deepEqual(toJsonSchema(schema), { type: 'alwaysValid' })
   })
 })

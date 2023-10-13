@@ -1,3 +1,9 @@
+# 0.4.0 (2023-10-13)
+
+### BREAKING CHANGE:
+
+- change functions to classes (#d138356)
+
 # 0.3.0 (2023-10-08)
 
 ### feat:

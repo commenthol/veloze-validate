@@ -2,8 +2,9 @@
 
 ### feat:
 
-- analyze() returns ValidationError (#98608c0)
-- allOf schema validation (#df893bd)
+- default values on undefined. Apply on cast() (#6a69da4)
+- analyze() returns ValidationError (#7f77337)
+- allOf schema validation (#d29222b)
 
 ### fix:
 
@@ -11,7 +12,7 @@
 
 ### docs:
 
-- fix examples (#023c204)
+- fix examples (#35748c3)
 
 ### chore:
 

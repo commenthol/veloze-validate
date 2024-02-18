@@ -787,6 +787,37 @@ export class AnyOf {
  */
 export const anyOf = (schemas) => new AnyOf(schemas)
 
+export class AllOf {
+  type = 'allOf'
+  constructor (schemas) {
+    if (!Array.isArray(schemas)) {
+      throw TypeError('schema array expected')
+    }
+    this._schemas = schemas
+  }
+
+  validate (v, e = {}) {
+    const path = [...(e.path || [])]
+    let cnt = 0
+    for (const schema of this._schemas) {
+      const _e = { path: [...path] }
+      if (!schema.validate(v, _e)) {
+        e.message = `allOf failed in schema[${cnt}]`
+        e.failures = [_e]
+        return false
+      }
+      cnt++
+    }
+    return true
+  }
+}
+
+/**
+ * Data must be valid against all of the given schemas
+ * @param {BaseT[]} schemas
+ */
+export const allOf = (schemas) => new AllOf(schemas)
+
 /**
  * not() turns an allow-list into a block-list.
  * This is explicitly not supported here as to enforce secure defaults.

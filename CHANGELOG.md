@@ -1,3 +1,17 @@
+# 0.5.0 (2024-02-18)
+
+### feat:
+
+- allOf schema validation (#df005ef)
+
+### fix:
+
+- types (#0a45b0d)
+
+### chore:
+
+- bump devdependencies (#a9b0ebd)
+
 # 0.4.0 (2023-10-13)
 
 ### BREAKING CHANGE:

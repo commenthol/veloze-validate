@@ -26,6 +26,7 @@ Less than 8k if minimized, less then 2.5kB if gzipped.
   * [objectT()](#objectt)
   * [oneOf()](#oneof)
   * [anyOf()](#anyof)
+  * [allOf()](#allof)
   * [toJsonSchema()](#tojsonschema)
   * [cast()](#cast)
 * [License](#license)
@@ -140,6 +141,7 @@ export function booleanT(
   cast(): this
   custom((v: boolean, e?: ValidationFailure) => boolean): this
   validate(v: any, e?: {}): boolean
+  analyze(v: any): ValidationError | undefined
 }
 ```
 
@@ -464,7 +466,7 @@ Data must be valid against exactly one of the given schemas.
 *typedef*
 
 ```ts
-export function oneOf(schemas: ValidationFn[]): {
+export function oneOf(schemas: BaseT[]): {
   validate(v: any, e?: {}): boolean;
 }
 ```
@@ -483,7 +485,7 @@ Data must be valid against any (one or more) of the given schemas
 *typedef*
 
 ```ts
-export function anyOf(schemas: ValidationFn[]): {
+export function anyOf(schemas: BaseT[]): {
   validate(v: any, e?: {}): boolean
 }
 ```
@@ -504,6 +506,36 @@ schema.validate({ str: '' }) // true
 schema.validate({ num: 0 }) // true
 
 schema.validate({ str: '', num: 0 }) // true
+```
+
+## allOf()
+
+Data must be valid against all of the given schemas
+
+*typedef*
+
+```ts
+export function allOf(schemas: BaseT[]): {
+  validate(v: any, e?: {}): boolean
+}
+```
+
+*usage*
+
+```js
+// object must either contain { str: string } and { num: number }
+const schema = allOf([
+  objectT({ str: stringT().min(3) }).additionalProperties(),
+  objectT({ num: numberT().min(0).max(10) }).additionalProperties()
+])
+
+schema.validate({}) // true
+schema.validate({ str: '' }) // true
+schema.validate({ num: 0 }) // true
+
+let failure = {}
+schema.validate({ str: 'aaa', num: -1 }, failure)
+// false {"message":"allOf failed in schema[1]","failures":[{"path":["num"],"message":"number less than min=0"}]}
 ```
 
 ## toJsonSchema()

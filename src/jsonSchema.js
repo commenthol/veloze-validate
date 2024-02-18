@@ -67,13 +67,7 @@ export const toJsonSchema = (schema) => {
       return out
     }
     case 'object': {
-      const {
-        _required,
-        _min,
-        _max,
-        _additionalProperties,
-        _schema
-      } = schema
+      const { _required, _min, _max, _additionalProperties, _schema } = schema
       const out = json({
         type,
         required: _required,
@@ -98,6 +92,11 @@ export const toJsonSchema = (schema) => {
     case 'anyOf': {
       return {
         anyOf: schema._schemas.map((subschema) => toJsonSchema(subschema))
+      }
+    }
+    case 'allOf': {
+      return {
+        allOf: schema._schemas.map((subschema) => toJsonSchema(subschema))
       }
     }
     default: {

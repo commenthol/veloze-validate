@@ -12,6 +12,7 @@ import {
   ADD_PROPS,
   oneOf,
   anyOf,
+  allOf,
   not
 } from '../src/index.js'
 
@@ -196,12 +197,12 @@ describe('validate', function () {
       equal(dateT({ max: 2 }).validate(new Date(), e), false)
       equal(e.message, 'date greater than max=1970-01-01T00:00:00.002Z')
       e = {}
-      equal(dateT({ max: 2, exclusiveMax: true }).validate(new Date(2), e), false)
-      equal(e.message, 'date greater equal than max=1970-01-01T00:00:00.002Z')
       equal(
-        dateT().max(2).exclusiveMax().validate(new Date(2)),
+        dateT({ max: 2, exclusiveMax: true }).validate(new Date(2), e),
         false
       )
+      equal(e.message, 'date greater equal than max=1970-01-01T00:00:00.002Z')
+      equal(dateT().max(2).exclusiveMax().validate(new Date(2)), false)
 
       equal(dateT().validate(true), false)
       equal(dateT().validate(1.23), false)
@@ -273,10 +274,7 @@ describe('validate', function () {
     })
 
     it('url validation', function () {
-      equal(
-        stringT().url().validate('https://foo.bar/path?a=1?b=2'),
-        true
-      )
+      equal(stringT().url().validate('https://foo.bar/path?a=1?b=2'), true)
       const e = {}
       equal(stringT().url().validate('/foo.bar/path', e), false)
       deepEqual(e, { message: 'string is not an url' })
@@ -291,17 +289,12 @@ describe('validate', function () {
 
     it('uuid validation', function () {
       equal(
-        stringT().uuid().validate(
-          '641663d3-4689-4ab0-842d-11fe8bfcfb17'
-        ),
+        stringT().uuid().validate('641663d3-4689-4ab0-842d-11fe8bfcfb17'),
         true
       )
       const e = {}
       equal(
-        stringT().uuid().validate(
-          '641663d3-4689-4ab0-842x-11fe8bfcfb17',
-          e
-        ),
+        stringT().uuid().validate('641663d3-4689-4ab0-842x-11fe8bfcfb17', e),
         false
       )
       deepEqual(e, { message: 'string is not an uuid' })
@@ -338,12 +331,15 @@ describe('validate', function () {
     })
 
     it('fails if type is not a function', function () {
-      assert.throws(() => {
-        arrayT(123)
-      }, {
-        name: 'TypeError',
-        message: 'schema expected'
-      })
+      assert.throws(
+        () => {
+          arrayT(123)
+        },
+        {
+          name: 'TypeError',
+          message: 'schema expected'
+        }
+      )
     })
 
     it('array validations', function () {
@@ -404,7 +400,10 @@ describe('validate', function () {
 
     it('minProperties maxProperties', function () {
       let e = {}
-      equal(objectT({}, { ...ADD_PROPS, min: 2 }).validate({ a: 1, b: 2 }, e), true)
+      equal(
+        objectT({}, { ...ADD_PROPS, min: 2 }).validate({ a: 1, b: 2 }, e),
+        true
+      )
       deepEqual(e, {
         additionalProps: [['a'], ['b']],
         path: []
@@ -415,7 +414,10 @@ describe('validate', function () {
         message: 'object has less than 2 properties'
       })
       e = {}
-      equal(objectT({}, { ...ADD_PROPS, max: 2 }).validate({ a: 1, b: 2 }, e), true)
+      equal(
+        objectT({}, { ...ADD_PROPS, max: 2 }).validate({ a: 1, b: 2 }, e),
+        true
+      )
       deepEqual(e, {
         additionalProps: [['a'], ['b']],
         path: []
@@ -672,6 +674,34 @@ describe('validate', function () {
     })
   })
 
+  describe('allOf', function () {
+    it('fails if schema is not an array', function () {
+      assert.throws(() => {
+        allOf(123)
+      }, /TypeError: schema array expected/)
+    })
+
+    it('a or b', function () {
+      const schema = allOf([
+        objectT({ a: stringT().min(3) }).additionalProperties(),
+        objectT({ b: stringT().min(5) }).additionalProperties()
+      ])
+
+      equal(schema.validate({ a: 'test' }), true)
+      equal(schema.validate({ b: 'testall' }), true)
+      const e = {}
+      equal(schema.validate({ a: 'test', b: 'test' }, e), false)
+      deepEqual(e, {
+        failures: [
+          {
+            message: 'string too short min=5',
+            path: ['b']
+          }
+        ],
+        message: 'allOf failed in schema[1]'
+      })
+    })
+  })
   describe('not', function () {
     it('not supported', function () {
       assert.throws(() => {

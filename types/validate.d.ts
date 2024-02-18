@@ -238,6 +238,13 @@ export class AnyOf {
     validate(v: any, e?: {}): boolean;
 }
 export function anyOf(schemas: BaseT[]): AnyOf;
+export class AllOf {
+    constructor(schemas: any);
+    type: string;
+    _schemas: any[];
+    validate(v: any, e?: {}): boolean;
+}
+export function allOf(schemas: BaseT[]): AllOf;
 export namespace type {
     export { booleanT as boolean };
     export { numberT as number };

@@ -4,6 +4,7 @@ import {
   type as t,
   oneOf,
   anyOf,
+  allOf,
   REQUIRED
 } from '../src/index.js'
 
@@ -226,6 +227,41 @@ describe('jsonSchema', function () {
       anyOf: [
         { type: 'number' },
         { type: 'string', minLength: 0, maxLength: 255 }
+      ]
+    })
+  })
+
+  it('convert allOf', function () {
+    const schema = allOf([
+      t.object({ a: t.number() }, { additionalProperties: true }),
+      t.object({ b: t.string() }, { additionalProperties: true })
+    ])
+    deepEqual(toJsonSchema(schema), {
+      allOf: [
+        {
+          type: 'object',
+          additionalProperties: true,
+          minProperties: 0,
+          maxProperties: 255,
+          properties: {
+            a: {
+              type: 'number'
+            }
+          }
+        },
+        {
+          type: 'object',
+          additionalProperties: true,
+          minProperties: 0,
+          maxProperties: 255,
+          properties: {
+            b: {
+              maxLength: 255,
+              minLength: 0,
+              type: 'string'
+            }
+          }
+        }
       ]
     })
   })

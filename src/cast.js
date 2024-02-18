@@ -69,6 +69,7 @@ export function cast (schema) {
       return objectCoerce(schema._schema)
     case 'oneOf':
     case 'anyOf':
+    case 'allOf':
       return oneOrAnyOfCoerce(schema._schemas)
     default:
       throw new TypeError(`unknown schema type=${type}`)

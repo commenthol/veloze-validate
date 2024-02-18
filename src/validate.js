@@ -714,7 +714,7 @@ export class ObjectT extends BaseT {
 }
 
 /**
- * @param {{[key: string]: ValidationFn}} schema
+ * @param {{[key: string]: BaseT}} schema
  * @param {{
  *  required?: boolean
  *  min?: number
@@ -752,7 +752,7 @@ export class OneOf {
 
 /**
  * Data must be valid against exactly one of the given schemas.
- * @param {ValidationFn[]} schemas
+ * @param {BaseT[]} schemas
  */
 export const oneOf = (schemas) => new OneOf(schemas)
 
@@ -783,7 +783,7 @@ export class AnyOf {
 
 /**
  * Data must be valid against any (one or more) of the given schemas
- * @param {ValidationFn[]} schemas
+ * @param {BaseT[]} schemas
  */
 export const anyOf = (schemas) => new AnyOf(schemas)
 

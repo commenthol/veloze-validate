@@ -216,7 +216,7 @@ export class ObjectT extends BaseT {
     additionalProperties(): this;
 }
 export function objectT(schema: {
-    [key: string]: ValidationFn;
+    [key: string]: BaseT;
 }, opts?: {
     required?: boolean | undefined;
     min?: number | undefined;
@@ -230,14 +230,14 @@ export class OneOf {
     _schemas: any[];
     validate(v: any, e?: {}): boolean;
 }
-export function oneOf(schemas: ValidationFn[]): OneOf;
+export function oneOf(schemas: BaseT[]): OneOf;
 export class AnyOf {
     constructor(schemas: any);
     type: string;
     _schemas: any[];
     validate(v: any, e?: {}): boolean;
 }
-export function anyOf(schemas: ValidationFn[]): AnyOf;
+export function anyOf(schemas: BaseT[]): AnyOf;
 export namespace type {
     export { booleanT as boolean };
     export { numberT as number };

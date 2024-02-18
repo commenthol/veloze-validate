@@ -13,7 +13,8 @@ import {
   oneOf,
   anyOf,
   allOf,
-  not
+  not,
+  ValidationError
 } from '../src/index.js'
 
 describe('validate', function () {
@@ -33,6 +34,17 @@ describe('validate', function () {
       equal(booleanT().validate(), true)
       equal(booleanT(REQUIRED).validate(true), true)
       equal(booleanT(REQUIRED).validate(false), true)
+    })
+
+    it('booleanT().analyze()', function () {
+      deepEqual(
+        booleanT().required().analyze('true'),
+        new ValidationError({ message: 'not a boolean' })
+      )
+      equal(
+        booleanT().required().analyze(true),
+        null
+      )
     })
 
     it('cast boolean from string', function () {
@@ -96,6 +108,13 @@ describe('validate', function () {
       equal(numberT().validate(null), false)
     })
 
+    it('numberT().analyze()', function () {
+      deepEqual(
+        numberT().max(0).exclusiveMax().analyze(0),
+        new ValidationError({ message: 'number greater equal than max=0' })
+      )
+    })
+
     it('cast number from string', function () {
       equal(numberT({ cast: true }).validate('12'), true)
       equal(numberT({ cast: true }).validate('-3.14'), true)
@@ -143,6 +162,13 @@ describe('validate', function () {
       equal(integerT().validate(true), false)
       equal(integerT().validate('1.23'), false)
       equal(integerT().validate(null), false)
+    })
+
+    it('integerT().analyze()', function () {
+      deepEqual(
+        integerT().max(0).exclusiveMax().analyze(-0.1),
+        new ValidationError({ message: 'not an integer' })
+      )
     })
   })
 
@@ -207,6 +233,15 @@ describe('validate', function () {
       equal(dateT().validate(true), false)
       equal(dateT().validate(1.23), false)
       equal(dateT().validate(null), false)
+    })
+
+    it('dateT().analyze()', function () {
+      deepEqual(
+        dateT({ max: 2, exclusiveMax: true }).analyze(new Date(2)),
+        new ValidationError({
+          message: 'date greater equal than max=1970-01-01T00:00:00.002Z'
+        })
+      )
     })
 
     it('custom validation', function () {

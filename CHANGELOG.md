@@ -2,6 +2,7 @@
 
 ### feat:
 
+- analyze() returns ValidationError (#98608c0)
 - allOf schema validation (#df893bd)
 
 ### fix:
@@ -10,7 +11,7 @@
 
 ### docs:
 
-- fix examples (#ac789bb)
+- fix examples (#023c204)
 
 ### chore:
 

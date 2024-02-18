@@ -9,7 +9,7 @@
 Easy type validator.  
 The validator bails out on first encountered schema violation.
 
-Less than 8k if minimized, less then 2.5kB if gzipped.
+Less than 9k if minimized, less then 2.5kB if gzipped.
 
 **Table of Contents**
 
@@ -117,9 +117,15 @@ In case of failure the reason for the validation failure is returned in the opti
 
 ```js
 const schema = numberT()
+
+/* check validity */
 const failure = {}
-schema.validate('str', failure)
-// failure == { message: 'not a number' }
+const isValid = schema.validate('str', failure)
+// isValid === false; failure == { message: 'not a number' }
+
+/* or analyze with error or null */
+const err = schema.analyze('str')
+if (err) throw err
 ```
 
 ## booleanT()
@@ -141,7 +147,7 @@ export function booleanT(
   cast(): this
   custom((v: boolean, e?: ValidationFailure) => boolean): this
   validate(v: any, e?: {}): boolean
-  analyze(v: any): ValidationError | undefined
+  analyze(v: any): ValidationError | null 
 }
 ```
 
@@ -195,6 +201,7 @@ export function numberT(
   exclusiveMax(): this
   custom((v: number, e?: ValidationFailure) => boolean): this
   validate(v: any, e?: {}): boolean
+  analyze(v: any): ValidationError | null
 }
 ```
 
@@ -246,6 +253,7 @@ export function integerT(
   exclusiveMax(): this
   custom((v: number, e?: ValidationFailure) => boolean): this
   validate(v: any, e?: {}): boolean
+  analyze(v: any): ValidationError | null
 }
 ```
 
@@ -293,6 +301,7 @@ export function stringT(
   pattern(pattern: RegExp): this
   custom((v: number, e?: ValidationFailure) => boolean): this
   validate(v: any, e?: {}): boolean
+  analyze(v: any): ValidationError | null
 }
 ```
 
@@ -346,6 +355,7 @@ export function enumT(
 ): {
   required(): this
   validate(v: any, e?: {}): boolean
+  analyze(v: any): ValidationError | null
 }
 ```
 
@@ -388,6 +398,7 @@ export function arrayT(
   max(max: number): this
   custom((v: any[], e?: ValidationFailure) => boolean): this
   validate(v: any, e?: {}): boolean
+  analyze(v: any): ValidationError | null
 }
 ```
 
@@ -432,6 +443,7 @@ export function objectT(
   additionalProperties(): this
   custom((v: object, e?: ValidationFailure) => boolean): this
   validate(v: any, e?: {}): boolean
+  analyze(v: any): ValidationError | null
 }
 ```
 
@@ -487,6 +499,7 @@ Data must be valid against any (one or more) of the given schemas
 ```ts
 export function anyOf(schemas: BaseT[]): {
   validate(v: any, e?: {}): boolean
+  analyze(v: any): ValidationError | null
 }
 ```
 
@@ -517,6 +530,7 @@ Data must be valid against all of the given schemas
 ```ts
 export function allOf(schemas: BaseT[]): {
   validate(v: any, e?: {}): boolean
+  analyze(v: any): ValidationError | null
 }
 ```
 

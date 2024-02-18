@@ -35,6 +35,14 @@ export const REQUIRED: Readonly<{
 export const ADD_PROPS: Readonly<{
     additionalProperties: true;
 }>;
+export class ValidationError extends Error {
+    /**
+     * @param {ValidationFailure} e
+     */
+    constructor(e: ValidationFailure);
+    path: string[] | undefined;
+    failures: ValidationFailure[] | undefined;
+}
 export class BaseT {
     /** @type {boolean|undefined} */
     _required: boolean | undefined;
@@ -66,18 +74,23 @@ export class BaseT {
      */
     custom(validateFn: ValidationFn): this;
     _validate: ValidationFn | undefined;
-}
-export class BooleanT extends BaseT {
-    constructor(opts: any);
-    type: string;
-    /** @type {((v: boolean, e?: ValidationFailure) => boolean)|undefined} */
-    _validate: ((v: boolean, e?: ValidationFailure) => boolean) | undefined;
     /**
      * @param {any} v
      * @param {ValidationFailure} [e]
      * @returns {boolean}
      */
     validate(v: any, e?: ValidationFailure | undefined): boolean;
+    /**
+     * @param {any} v
+     * @returns {ValidationError|null}
+     */
+    analyze(v: any): ValidationError | null;
+}
+export class BooleanT extends BaseT {
+    constructor(opts: any);
+    type: string;
+    /** @type {((v: boolean, e?: ValidationFailure) => boolean)|undefined} */
+    _validate: ((v: boolean, e?: ValidationFailure) => boolean) | undefined;
 }
 export function booleanT(opts?: {
     required?: boolean | undefined;

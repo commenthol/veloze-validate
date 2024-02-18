@@ -52,6 +52,18 @@ function addOpts (that, opts) {
   }
 }
 
+export class ValidationError extends Error {
+  /**
+   * @param {ValidationFailure} e
+   */
+  constructor (e) {
+    const message = e?.message || 'validation failed'
+    super(message)
+    this.path = e.path
+    this.failures = e.failures
+  }
+}
+
 export class BaseT {
   /** @type {boolean|undefined} */
   _required
@@ -101,6 +113,29 @@ export class BaseT {
   custom (validateFn) {
     this._validate = validateFn
     return this
+  }
+
+  /**
+   * @param {any} v
+   * @param {ValidationFailure} [e]
+   * @returns {boolean}
+   */
+  /* c8 ignore next 4 */
+  // eslint-disable-next-line no-unused-vars
+  validate (v, e = {}) {
+    return false
+  }
+
+  /**
+   * @param {any} v
+   * @returns {ValidationError|null}
+   */
+  analyze (v) {
+    const e = {}
+    if (!this.validate(v, e)) {
+      return new ValidationError(e)
+    }
+    return null
   }
 }
 
@@ -269,7 +304,7 @@ export const integerT = (opts) => new IntegerT(opts)
  * @param {any} v
  * @returns {Date|undefined}
  */
-export const toDate = v => v && new Date(v)
+export const toDate = (v) => v && new Date(v)
 
 export class DateT extends NumberT {
   type = 'date'

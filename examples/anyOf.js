@@ -14,21 +14,21 @@ const schema = anyOf([
 ])
 
 let failure = {}
-let valid = schema({}, failure)
+let valid = schema.validate({}, failure)
 console.log('%s %j', valid, failure)
 // false {"failures":[{"path":["str"],"message":"not a string"},{"path":["num"],"message":"not a number"}],"message":"anyOf failed"}
 
 failure = {}
-valid = schema({ str: '' }, failure)
+valid = schema.validate({ str: '' }, failure)
 console.log('%s %j', valid, failure)
 // true {}
 
 failure = {}
-valid = schema({ num: 0 }, failure)
+valid = schema.validate({ num: 0 }, failure)
 console.log('%s %j', valid, failure)
 // true {}
 
 failure = {}
-valid = schema({ str: '', num: 0 }, failure)
+valid = schema.validate({ str: '', num: 0 }, failure)
 console.log('%s %j', valid, failure)
 // true {}

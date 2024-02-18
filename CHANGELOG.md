@@ -2,11 +2,15 @@
 
 ### feat:
 
-- allOf schema validation (#df005ef)
+- allOf schema validation (#df893bd)
 
 ### fix:
 
 - types (#0a45b0d)
+
+### docs:
+
+- fix examples (#ac789bb)
 
 ### chore:
 

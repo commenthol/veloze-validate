@@ -35,19 +35,19 @@ const schema = objectT(
 )
 
 let e = {}
-let valid = schema({ obj: {}, other: true }, e)
+let valid = schema.validate({ obj: {}, other: true }, e)
 console.log(valid, e) // true {}
 
 e = {}
-valid = schema({ bool: true, num: '123' }, e)
+valid = schema.validate({ bool: true, num: '123' }, e)
 console.log(valid, e) // false { message: 'not a number', path: [ 'num' ] }
 
 e = {}
-valid = schema({ arr: ['a', 1, 1.2] }, e)
+valid = schema.validate({ arr: ['a', 1, 1.2] }, e)
 console.log(valid, e)
 // false { path: [ 'arr', '2' ], message: 'oneOf failed, matches 0 schemas' }
 
 e = {}
-valid = schema({ any: { flag: true, test: '1' }, obj: {} }, e)
+valid = schema.validate({ any: { flag: true, test: '1' }, obj: {} }, e)
 console.log('%s %j', valid, e)
 // false {"path":["any"],"failures":[{"path":["test"],"message":"not a number"}],"message":"allOf failed"}

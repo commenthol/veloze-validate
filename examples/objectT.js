@@ -6,19 +6,19 @@ const subschema = {
 }
 const schema = objectT(subschema, { ...REQUIRED, ...ADD_PROPS, min: 1 })
 
-schema({ str: 'hi', num: 2 }) // true
+schema.validate({ str: 'hi', num: 2 }) // true
 
 let failure = {}
-schema({}, failure)
+schema.validate({}, failure)
 console.log(failure)
 // failure == { message: 'object has less than 1 properties' }
 
 failure = {}
-schema({ str: 1 }, failure)
+schema.validate({ str: 1 }, failure)
 console.log(failure)
 // failure == { path: [ 'str' ], message: 'not a string' }
 
 failure = {}
-schema({ str: 'hi', num: 'abc' }, failure)
+schema.validate({ str: 'hi', num: 'abc' }, failure)
 console.log(failure)
 // failure == { path: [ 'num' ], message: 'not a number' }

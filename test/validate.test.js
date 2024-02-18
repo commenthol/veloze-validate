@@ -27,6 +27,15 @@ describe('validate', function () {
   })
 
   describe('booleanT', function () {
+    it('shall throw if default() has not correct type', function () {
+      try {
+        booleanT().default('true')
+        throw new Error()
+      } catch (e) {
+        assert.equal(e.message, 'default: not a boolean')
+      }
+    })
+
     it('boolean validations', function () {
       const e = {}
       equal(booleanT(REQUIRED).validate(undefined, e), false)
@@ -65,6 +74,15 @@ describe('validate', function () {
   })
 
   describe('numberT', function () {
+    it('shall throw if default() has not correct type', function () {
+      try {
+        numberT().default(true)
+        throw new Error()
+      } catch (e) {
+        assert.equal(e.message, 'default: not a number')
+      }
+    })
+
     it('fails if min is greater max', function () {
       assert.throws(() => {
         numberT({ min: 10, max: 1 })
@@ -141,6 +159,15 @@ describe('validate', function () {
   })
 
   describe('integerT', function () {
+    it('shall throw if default() has not correct type', function () {
+      try {
+        integerT().default(1.2)
+        throw new Error()
+      } catch (e) {
+        assert.equal(e.message, 'default: not an integer')
+      }
+    })
+
     it('integer validations', function () {
       let e = {}
       equal(integerT(REQUIRED).validate(undefined, e), false)
@@ -256,6 +283,15 @@ describe('validate', function () {
   })
 
   describe('stringT', function () {
+    it('shall throw if default() has not correct type', function () {
+      try {
+        stringT().default(1.2)
+        throw new Error()
+      } catch (e) {
+        assert.equal(e.message, 'default: not a string')
+      }
+    })
+
     it('fails if min is greater max', function () {
       assert.throws(() => {
         stringT({ min: 10, max: 1 })
@@ -337,6 +373,15 @@ describe('validate', function () {
   })
 
   describe('enumT', function () {
+    it('shall throw if default() has not correct type', function () {
+      try {
+        enumT([1, 2, 3]).default(4)
+        throw new Error()
+      } catch (e) {
+        assert.equal(e.message, 'default: not an enum value')
+      }
+    })
+
     it('fails if list is not an array', function () {
       assert.throws(() => {
         enumT(123)
@@ -359,6 +404,15 @@ describe('validate', function () {
   })
 
   describe('arrayT', function () {
+    it('shall throw if default() has not correct type', function () {
+      try {
+        arrayT(numberT().min(0).max(10)).default([11])
+        throw new Error()
+      } catch (e) {
+        assert.equal(e.message, 'default: number greater than max=10')
+      }
+    })
+
     it('fails if min is greater max', function () {
       assert.throws(() => {
         arrayT(numberT(), { min: 10, max: 1 })
@@ -424,6 +478,17 @@ describe('validate', function () {
       assert.throws(() => {
         objectT({}, { min: 10, max: 1 })
       }, /RangeError: min, max issue/)
+    })
+
+    it('shall throw if default() has not correct type', function () {
+      try {
+        objectT({
+          bool: booleanT()
+        }).default({ bool: 'foo' })
+        throw new Error()
+      } catch (e) {
+        assert.equal(e.message, 'default: not a boolean')
+      }
     })
 
     it('object validation', function () {

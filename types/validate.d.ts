@@ -56,8 +56,11 @@ export class BaseT {
     _exclusiveMin: boolean | undefined;
     /** @type {boolean|undefined} */
     _exclusiveMax: boolean | undefined;
+    /** @type {any} */
+    _default: any;
     required(): this;
     cast(): this;
+    default(v: any): this;
     /**
      * @param {number} min
      * @returns {this}

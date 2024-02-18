@@ -31,6 +31,11 @@ describe('cast', function () {
       equal(cast(schema)(false), false)
       equal(cast(schema)('false'), 'false')
     })
+
+    it('shall use default', function () {
+      const schema = booleanT().default(true)
+      equal(cast(schema)(), true)
+    })
   })
 
   describe('number', function () {
@@ -41,9 +46,19 @@ describe('cast', function () {
     })
 
     it('shall not cast', function () {
-      const schema = booleanT({ cast: false })
+      const schema = numberT({ cast: false })
       equal(cast(schema)(5.67), 5.67)
       equal(cast(schema)('5.67'), '5.67')
+    })
+
+    it('shall use static default', function () {
+      const schema = numberT().default(1.23)
+      equal(cast(schema)(), 1.23)
+    })
+
+    it('shall use dynamic default', function () {
+      const schema = numberT().default(() => 1.23)
+      equal(cast(schema)(), 1.23)
     })
   })
 

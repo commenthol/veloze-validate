@@ -11,7 +11,8 @@ const noCoerce = (v) => v
 
 const stringDateTimeCoerce = (v) => new Date(v)
 
-const arrayCoerce = (schema) => (v) => Array.isArray(v) ? v.map(cast(schema)) : v
+const arrayCoerce = (schema) => (v) =>
+  Array.isArray(v) ? v.map(cast(schema)) : v
 
 const objectCoerce = (schema) => (v) => {
   if (!v) return v
@@ -44,34 +45,51 @@ const oneOrAnyOfCoerce = (schemas) => (v) => {
  * @returns {(any) => any}
  */
 export function cast (schema) {
-  const { type, format, coerce, _cast, _validate } = schema
+  const { type, format, coerce, _cast, _validate, _default } = schema
 
   if (_cast && typeof coerce === 'function') {
     return (v) => schema.coerce(v)
   }
 
+  let fn
   switch (type) {
     case 'boolean':
-      return _cast ? booleanCoerce : noCoerce
+      fn = _cast ? booleanCoerce : noCoerce
+      break
     case 'integer':
     case 'number':
-      return _cast ? numberCoerce : noCoerce
+      fn = _cast ? numberCoerce : noCoerce
+      break
     case 'string':
-      return _cast && (_validate === validateDateTime || format === 'date-time')
-        ? stringDateTimeCoerce
-        : noCoerce
+      fn =
+        _cast && (_validate === validateDateTime || format === 'date-time')
+          ? stringDateTimeCoerce
+          : noCoerce
+      break
     case 'date':
     case 'enum':
-      return noCoerce
+      fn = noCoerce
+      break
     case 'array':
-      return arrayCoerce(schema._schema)
+      fn = arrayCoerce(schema._schema)
+      break
     case 'object':
-      return objectCoerce(schema._schema)
+      fn = objectCoerce(schema._schema)
+      break
     case 'oneOf':
     case 'anyOf':
     case 'allOf':
-      return oneOrAnyOfCoerce(schema._schemas)
+      fn = oneOrAnyOfCoerce(schema._schemas)
+      break
     default:
       throw new TypeError(`unknown schema type=${type}`)
   }
+  return _default === undefined
+    ? fn
+    : (v) =>
+        v !== undefined
+          ? fn(v)
+          : typeof _default === 'function'
+            ? _default()
+            : _default
 }

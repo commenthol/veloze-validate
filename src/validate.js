@@ -77,6 +77,8 @@ export class BaseT {
   _exclusiveMin
   /** @type {boolean|undefined} */
   _exclusiveMax
+  /** @type {any} */
+  _default
 
   required () {
     this._required = true
@@ -85,6 +87,17 @@ export class BaseT {
 
   cast () {
     this._cast = true
+    return this
+  }
+
+  default (v) {
+    const e = {}
+    const val = typeof v === 'function' ? v() : v
+    if (!this.validate(val, e)) {
+      e.message = `default: ${e.message}`
+      throw new ValidationError(e)
+    }
+    this._default = v
     return this
   }
 

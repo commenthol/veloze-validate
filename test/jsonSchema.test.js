@@ -28,6 +28,10 @@ describe('jsonSchema', function () {
       type: 'boolean',
       required: true
     })
+    deepEqual(toJsonSchema(t.boolean().default(false)), {
+      type: 'boolean',
+      default: false
+    })
   })
 
   it('convert number', function () {
@@ -55,6 +59,10 @@ describe('jsonSchema', function () {
         exclusiveMax: true
       }
     )
+    deepEqual(toJsonSchema(t.number().default(1.234)), {
+      type: 'number',
+      default: 1.234
+    })
   })
 
   it('shall ignore date', function () {
@@ -83,6 +91,12 @@ describe('jsonSchema', function () {
       minLength: 0,
       maxLength: 255,
       pattern: '^foo\\.bar'
+    })
+    deepEqual(toJsonSchema(t.string().default('hello')), {
+      type: 'string',
+      minLength: 0,
+      maxLength: 255,
+      default: 'hello'
     })
   })
 
@@ -117,6 +131,10 @@ describe('jsonSchema', function () {
       enum: ['a', 'b'],
       required: true
     })
+    deepEqual(toJsonSchema(t.enum(['a', 'b']).default('a')), {
+      enum: ['a', 'b'],
+      default: 'a'
+    })
   })
 
   it('convert array', function () {
@@ -150,6 +168,20 @@ describe('jsonSchema', function () {
         maxLength: 255
       }
     })
+    deepEqual(
+      toJsonSchema(t.array(t.string()).min(0).max(5).default(['one', 'two'])),
+      {
+        type: 'array',
+        minItems: 0,
+        maxItems: 5,
+        items: {
+          type: 'string',
+          minLength: 0,
+          maxLength: 255
+        },
+        default: ['one', 'two']
+      }
+    )
   })
 
   it('convert object', function () {

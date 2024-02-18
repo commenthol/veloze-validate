@@ -11,14 +11,15 @@ export const json = (v) => JSON.parse(JSON.stringify(v))
  * @returns {object} json schema
  */
 export const toJsonSchema = (schema) => {
-  const { type } = schema
+  const { type, _default: d } = schema
 
   switch (type) {
     case 'boolean': {
       const { _required } = schema
       return json({
         type,
-        required: _required
+        required: _required,
+        default: d
       })
     }
     case 'integer':
@@ -30,7 +31,8 @@ export const toJsonSchema = (schema) => {
         minimum: _min === Number.MIN_SAFE_INTEGER ? undefined : _min,
         maximum: _max === Number.MAX_SAFE_INTEGER ? undefined : _max,
         exclusiveMin: _exclusiveMin,
-        exclusiveMax: _exclusiveMax
+        exclusiveMax: _exclusiveMax,
+        default: d
       })
     }
     case 'date': {
@@ -45,14 +47,16 @@ export const toJsonSchema = (schema) => {
         required: _required,
         minLength: _min,
         maxLength: _max,
-        pattern: _pattern?.source
+        pattern: _pattern?.source,
+        default: d
       })
     }
     case 'enum': {
       const { _required, _list } = schema
       return json({
         enum: _list,
-        required: _required
+        required: _required,
+        default: d
       })
     }
     case 'array': {
@@ -61,7 +65,8 @@ export const toJsonSchema = (schema) => {
         type,
         required: _required,
         minItems: _min,
-        maxItems: _max
+        maxItems: _max,
+        default: d
       })
       out.items = toJsonSchema(_schema)
       return out
@@ -73,7 +78,8 @@ export const toJsonSchema = (schema) => {
         required: _required,
         minProperties: _min,
         maxProperties: _max,
-        additionalProperties: _additionalProperties
+        additionalProperties: _additionalProperties,
+        default: d
       })
       out.properties = Object.entries(_schema).reduce(
         (curr, [prop, schema]) => {

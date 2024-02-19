@@ -526,6 +526,7 @@ export class StringT extends BaseT {
     this.format = 'date-time'
     return this
   }
+
   /**
    * RFC6531 or RFC5321 (ascii=true) email validation
    * @note No support for quoted emails

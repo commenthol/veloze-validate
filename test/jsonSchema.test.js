@@ -103,7 +103,7 @@ describe('jsonSchema', function () {
   it('convert string formats', function () {
     deepEqual(toJsonSchema(t.string().url()), {
       type: 'string',
-      format: 'url',
+      format: 'uri',
       minLength: 0,
       maxLength: 255
     })

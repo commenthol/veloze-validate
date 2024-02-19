@@ -1,3 +1,5 @@
+import fs from 'fs'
+import yaml from 'js-yaml'
 import assert, { equal, deepEqual } from 'assert/strict'
 import {
   booleanT,
@@ -16,6 +18,8 @@ import {
   not,
   ValidationError
 } from '../src/index.js'
+
+const emailFixtures = yaml.load(fs.readFileSync(new URL('./fixtures/email.yaml', import.meta.url), 'utf-8'))
 
 describe('validate', function () {
   describe('REQUIRED', function () {
@@ -50,10 +54,7 @@ describe('validate', function () {
         booleanT().required().analyze('true'),
         new ValidationError({ message: 'not a boolean' })
       )
-      equal(
-        booleanT().required().analyze(true),
-        null
-      )
+      equal(booleanT().required().analyze(true), null)
     })
 
     it('cast boolean from string', function () {
@@ -369,6 +370,19 @@ describe('validate', function () {
         false
       )
       deepEqual(e, { message: 'string is not an uuid' })
+    })
+  })
+
+  describe('stringT() email validation', function () {
+    emailFixtures.forEach(({ test, mail, err, opts, only }) => {
+      const fn = only ? it.only : it
+      fn(test || JSON.stringify(mail), function () {
+        const e = {}
+        const actual = stringT().required().email(opts).validate(mail, e)
+        assert.equal(actual, !err)
+        // console.log(e)
+        e.message && assert.equal(e.message, err)
+      })
     })
   })
 

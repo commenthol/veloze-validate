@@ -277,6 +277,13 @@ schema.validate(2) // false
 Validates if type is string.
 Defaults to minimum length 0 and maximum length 255.
 
+Validates string formats like:
+- url
+- uuid
+- date-time
+- email 
+- hostname
+
 *typedef*
 
 ```ts
@@ -295,9 +302,21 @@ export function stringT(
   cast(): this
   min(min: number): this
   max(max: number): this
+  /** validate url */
   url(): this
-  uuid(): this
+  /** validate uuid; does not check on uuid version byte */
+  uuid(): this;
+  /** expects string to be a date */
   dateTime(): this
+  /**
+   * RFC6531 or RFC5321 (ascii=true) email validation
+   * @note No support for quoted emails
+   */
+  email(options?: {ascii: boolean, minDomainSegments: number}): this;
+  /**
+   * RFC5890 or RFC1123 (ascii=true) Hostname validation
+   */
+  hostname(options?: {ascii: boolean, minDomainSegments: number}): this;
   pattern(pattern: RegExp): this
   custom((v: number, e?: ValidationFailure) => boolean): this
   validate(v: any, e?: {}): boolean
@@ -334,8 +353,13 @@ schema.validate('bcd') // false
 
 // string format URL check using validateUrl
 const schema = stringT().url()
-schema.validate('https://foo.bar', true)
-schema.validate('/foo.bar', false)
+schema.validate('https://foo.bar')  // true
+schema.validate('/foo.bar')         // false
+
+// email validation with internationalized mails
+const schema = stringT().email().required()
+schema.validate('ɱë@ťëŝṫ.ʈḽḏ')    // true
+schema.validate('test.test.test') // false
 ```
 
 ## enumT()

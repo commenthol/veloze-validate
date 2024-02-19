@@ -1,0 +1,933 @@
+- test: ok - valid email
+  mail: john.doe@test.tld
+- test: ok - max local part
+  mail: 1234567890123456789012345678901234567890123456789012345678901234@test.tld
+- test: ok - uncommon characters
+  mail: customer/department=shipping@test.tld
+- test: ok - uncommon characters 2
+  mail: '!foo!bar.%xyz+@test.tld'
+- test: ok - international domain
+  mail: test@tëst.tld
+- mail: 'ɱë@ťëŝṫ.ʈḽḏ'
+- test: must not be empty
+  mail: ''
+  err: invalid email
+- test: must not be @
+  mail: '@'
+  err: empty local segment
+- test: email must contain one @ character
+  mail: test
+  err: invalid email
+- test: must not contain more than one @ char
+  mail: test@test@test
+  err: multiple @ chars
+- test: local part cannot be empty
+  mail: '@test.tld'
+  err: empty local segment
+- test: local part too long
+  mail: 12345678901234567890123456789012345678901234567890123456789012345@test.tld
+  err: local part too long
+- test: invalid character in local part
+  mail: a:b@test.tld
+  err: invalid character
+- test: local part contains empty segment
+  mail: a..b@test.tld
+  err: empty local segment
+- test: domain must not be empty
+  mail: test@
+  err: empty domain
+- test: domain must have 2 segments min
+  mail: test@test
+  err: less than 2 domain segments
+- test: domain contains empty segment
+  mail: test@test..tld
+  err: empty domain segment
+- test: domain segment too long
+  mail: >-
+    test@test.1234567890123456789012345678901234567890123456789012345678901234.tld
+  err: domain segment too long
+- test: domain invalid character
+  mail: test@test_.tld
+  err: invalid domain character
+- test: domain invalid hyphen at start
+  mail: test@-test.tld
+  err: invalid domain characters
+- test: domain invalid hyphen at end
+  mail: test@test-.tld
+  err: invalid domain characters
+- test: domain invalid double hyphens
+  mail: test@te--st.tld
+  err: invalid domain characters
+# RFC5321
+- test: RFC5321 - unicode local part
+  mail: tëst@test.tld
+  err: forbidden unicode
+  opts:
+    ascii: true
+- test: RFC5321 - unicode domain
+  mail: test@tëst.tld
+  err: forbidden unicode
+  opts:
+    ascii: true
+# @credits https://github.com/skeggse/isemail/blob/master/test/tests.json
+# @license BSD-3-Clause
+# Copyright (c) 2014-2015, Eli Skeggs and Project contributors
+# Copyright (c) 2013-2014, GlobeSherpa
+# Copyright (c) 2008-2011, Dominic Sayers
+- test: "carriage return"
+  mail: "\r"
+  note: errCRNoLF
+  err: invalid email
+- mail: test
+  note: errNoDomain
+  err: invalid email
+- mail: '@'
+  note: errNoLocalPart
+  err: empty local segment
+- mail: test@
+  note: errNoDomain
+  err: empty domain
+- mail: test@io
+  note: valid
+  err: less than 2 domain segments
+- test: test@io minDomainSegemnts=1
+  mail: test@io
+  note: valid
+  err: less than 2 domain segments
+  opts:
+    minDomainSegemnts: 1
+- mail: '@io'
+  note: errNoLocalPart
+  err: empty local segment
+- mail: '@iana.org'
+  note: errNoLocalPart
+  err: empty local segment
+- mail: test@iana.org
+  note: valid
+- mail: test@nominet.org.uk
+  note: valid
+- mail: test@about.museum
+  note: valid
+- mail: a@iana.org
+  note: valid
+- mail: êjness@iana.org
+  note: valid
+- mail: ñoñó1234@iana.org
+  note: valid
+- mail: ñoñó1234@something.com
+  note: valid
+- mail: 伊昭傑@郵件.商務
+  note: valid
+- mail: 𐐷𤭢@iana.org
+  note: valid
+- mail: test.test@iana.org
+  note: valid
+- mail: .test@iana.org
+  note: errDotStart
+  err: empty local segment
+- mail: test.@iana.org
+  note: errDotEnd
+  err: empty local segment
+- mail: test..iana.org
+  note: errConsecutiveDots
+  err: invalid email
+- mail: test_exa-mple.com
+  note: errNoDomain
+  err: invalid email
+- mail: '!#$%&`*+/=?^`{|}~@iana.org'
+  note: valid
+- mail: test\@test@iana.org
+  note: errExpectingATEXT
+  err: multiple @ chars
+- mail: 123@iana.org
+  note: valid
+- mail: test@123.com
+  note: valid
+- mail: test@iana.123
+  note: rfc5321TLDNumeric
+  err: invalid domain
+- mail: test@255.255.255.255
+  note: rfc5321TLDNumeric
+  todo: valid mail
+- mail: abcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyzabcdefghiklm@iana.org
+  note: valid
+- mail: abcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyzabcdefghiklmn@iana.org
+  note: rfc5322LocalTooLong
+  err: local part too long
+- mail: 😆😆😆😆😆😆😆😆😆😆😆😆😆😆😆😆😆@iana.org
+  note: rfc5322LocalTooLong
+  err: local part too long
+- mail: test@abcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyzabcdefghiklm
+  note: rfc5322LabelTooLong
+  err: less than 2 domain segments
+- mail: test@😆😆😆😆😆😆😆😆😆😆😆😆😆😆😆😆😆.org
+  note: valid
+- mail: >-
+    test@abcdefghijklmnopqrstuvwxyzabcdefghijklmno😆😆😆😆😆😆😆😆😆😆😆😆😆😆😆😆😆.org
+  note: rfc5322LabelTooLong
+  err: domain segment too long
+- mail: test@abcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyzabcdefghiklm.com
+  note: rfc5322LabelTooLong
+  err: domain segment too long
+- mail: test@mason-dixon.com
+  note: valid
+- mail: test@-iana.org
+  note: errDomainHyphenStart
+  err: invalid domain characters
+- mail: test@iana-.com
+  note: errDomainHyphenEnd
+  err: invalid domain characters
+- mail: test@.iana.org
+  note: errDotStart
+  err: empty domain segment
+- mail: test@iana.org.
+  note: errDotEnd
+  err: empty domain segment
+- mail: test@iana..com
+  note: errConsecutiveDots
+  err: empty domain segment
+- mail: >-
+    abcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyzabcdefghiklm@abcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyzabcdefg.abcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyzabcdefg.abcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyzabcdefg.abcdefghijklmno
+  note: rfc5322TooLong
+  err: string too long max=255
+- mail: >-
+    abcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyzabcdefghiklm@abcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyzabcdefg.abcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyzabcdefg.abcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyzabcdefg.😆😆😆😆
+  note: rfc5322TooLong
+  err: email too long
+- mail: >-
+    abcdef@abcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyzabcdefg.abcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyzabcdefg.abcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyzabcdefg.abcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyzabcdef.hijklmnopqrstuv
+  note: rfc5322TooLong
+  err: string too long max=255
+- mail: >-
+    abcdef@abcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyzabcdefg.abcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyzabcdefg.abcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyzabcdefg.abcdefghi.abcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyzabcd😆
+  note: rfc5322LabelTooLong
+  err: email too long
+- mail: >-
+    abcdef@abcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyzabcdefg.abcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyzabcdefg.abcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyzabcdefg.abcdefghi.abcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyz😆
+  note: rfc5322TooLong
+  todo: is valid
+- mail: >-
+    a@abcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyzabcdefg.abcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyzabcdefg.abcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyzabcdefg.abcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyzabcdefg.abcdefghijkl.hijk
+  note: rfc5322DomainTooLong
+  err: string too long max=255
+- mail: >-
+    a@abcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyzabcdefg.abcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyzabcdefg.abcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyzabcdefg.abcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyzabcdefg.abcdefghijkl.😆
+  note: rfc5322DomainTooLong
+  err: string too long max=255
+- test: "quote CR"
+  mail: "\"\r"
+  note: errCRNoLF
+  err: invalid email
+- mail: '"test"@iana.org'
+  note: rfc5321QuotedString
+  err: invalid character
+- mail: '""@iana.org'
+  note: rfc5321QuotedString
+  err: invalid character
+- mail: '"""@iana.org'
+  note: errExpectingATEXT
+  err: invalid character
+- mail: '"\a"@iana.org'
+  note: rfc5321QuotedString
+  err: invalid character
+- mail: '"\""@iana.org'
+  note: rfc5321QuotedString
+  err: invalid character
+- mail: '"\"@iana.org'
+  note: errUnclosedQuotedString
+  err: invalid character
+- mail: '"\\"@iana.org'
+  note: rfc5321QuotedString
+  err: invalid character
+- mail: test"@iana.org
+  note: errExpectingATEXT
+  err: invalid character
+- mail: '"test@iana.org'
+  note: errUnclosedQuotedString
+  err: invalid character
+- mail: '"test"test@iana.org'
+  note: errATEXTAfterQS
+  err: invalid character
+- mail: test"text"@iana.org
+  note: errExpectingATEXT
+  err: invalid character
+- mail: '"test""test"@iana.org'
+  note: errExpectingATEXT
+  err: invalid character
+- mail: '"test"."test"@iana.org'
+  note: deprecatedLocalPart
+  err: invalid character
+- mail: '"test\ test"@iana.org'
+  note: rfc5321QuotedString
+  err: invalid character
+- mail: '"test".test@iana.org'
+  note: deprecatedLocalPart
+  err: invalid character
+- mail: "\"test\0\"@iana.org"
+  note: errExpectingQTEXT
+  err: invalid character
+- mail: "\"test\\\0\"@iana.org"
+  note: deprecatedQP
+  err: invalid character
+- mail: "\"test\r\n test\"@iana.org"
+  note: cfwsFWS
+  err: invalid character
+- mail: '"abcdefghijklmnopqrstuvwxyz abcdefghijklmnopqrstuvwxyz abcdefghj"@iana.org'
+  note: rfc5322LocalTooLong
+  err: local part too long
+- mail: '"abcdefghijklmnopqrstuvwxyz abcdefghijklmnopqrstuvwxyz abcdefg\h"@iana.org'
+  note: rfc5322LocalTooLong
+  err: local part too long
+- mail: test@[255.255.255.255]
+  note: rfc5321AddressLiteral
+  err: invalid domain
+- mail: test@a[255.255.255.255]
+  note: errExpectingATEXT
+  err: invalid domain
+- mail: test@[255.255.255]
+  note: rfc5322DomainLiteral
+  err: invalid domain
+- mail: test@[255.255.255.255.255]
+  note: rfc5322DomainLiteral
+  err: invalid domain
+- mail: test@[255.255.255.256]
+  note: rfc5322DomainLiteral
+  err: invalid domain
+- mail: test@[1111:2222:3333:4444:5555:6666:7777:8888]
+  note: rfc5322DomainLiteral
+  err: invalid domain
+- mail: test@[IPv6:1111:2222:3333:4444:5555:6666:7777]
+  note: rfc5322IPv6GroupCount
+  err: invalid domain
+- mail: test@[IPv6:1111:2222:3333:4444:5555:6666:7777:8888]
+  note: rfc5321AddressLiteral
+  err: invalid domain
+- mail: test@[IPv6:1111:2222:3333:4444:5555:6666:7777:8888:9999]
+  note: rfc5322IPv6GroupCount
+  err: invalid domain
+- mail: test@[IPv6:1111:2222:3333:4444:5555:6666:7777:888G]
+  note: rfc5322IPv6BadCharacter
+  err: invalid domain
+- mail: test@[IPv6:1111:2222:3333:4444:5555:6666::8888]
+  note: deprecatedIPv6
+  err: invalid domain
+- mail: test@[IPv6:1111:2222:3333:4444:5555::8888]
+  note: rfc5321AddressLiteral
+  err: invalid domain
+- mail: test@[IPv6:1111:2222:3333:4444:5555:6666::7777:8888]
+  note: rfc5322IPv6MaxGroups
+  err: invalid domain
+- mail: test@[IPv6::3333:4444:5555:6666:7777:8888]
+  note: rfc5322IPv6ColonStart
+  err: invalid domain
+- mail: test@[IPv6:::3333:4444:5555:6666:7777:8888]
+  note: rfc5321AddressLiteral
+  err: invalid domain
+- mail: test@[IPv6:1111::4444:5555::8888]
+  note: rfc5322IPv62x2xColon
+  err: invalid domain
+- mail: test@[IPv6:::]
+  note: rfc5321AddressLiteral
+  err: invalid domain
+- mail: test@[IPv6:1111:2222:3333:4444:5555:255.255.255.255]
+  note: rfc5322IPv6GroupCount
+  err: invalid domain
+- mail: test@[IPv6:1111:2222:3333:4444:5555:6666:255.255.255.255]
+  note: rfc5321AddressLiteral
+  err: invalid domain
+- mail: test@[IPv6:1111:2222:3333:4444:5555:6666:7777:255.255.255.255]
+  note: rfc5322IPv6GroupCount
+  err: invalid domain
+- mail: test@[IPv6:1111:2222:3333:4444::255.255.255.255]
+  note: rfc5321AddressLiteral
+  err: invalid domain
+- mail: test@[IPv6:1111:2222:3333:4444:5555:6666::255.255.255.255]
+  note: rfc5322IPv6MaxGroups
+  err: invalid domain
+- mail: test@[IPv6:1111:2222:3333:4444:::255.255.255.255]
+  note: rfc5322IPv62x2xColon
+  err: invalid domain
+- mail: test@[IPv6::255.255.255.255]
+  note: rfc5322IPv6ColonStart
+  err: invalid domain
+- mail: test@[255.255.255.255].local
+  note: errDotAfterDomainLiteral
+  err: invalid domain
+- mail: test@local.[255.255.255.255]
+  note: errExpectingATEXT
+  err: invalid domain
+- mail: test@local.[255.255.255.255].local
+  note: errExpectingATEXT
+  err: invalid domain
+- mail: test@local.(comment)[255.255.255.255].local
+  note: errExpectingATEXT
+  err: invalid domain
+- mail: test@local. [255.255.255.255].local
+  note: errExpectingATEXT
+  err: invalid domain
+- mail: test@local.[255.255.255.255](comment).local
+  note: errExpectingATEXT
+  err: invalid domain
+- mail: test@local.[255.255.255.255] .local
+  note: errExpectingATEXT
+  err: invalid domain
+- mail: ' test @iana.org'
+  note: deprecatedCFWSNearAt
+  err: invalid character
+- mail: test@ iana .com
+  note: deprecatedCFWSNearAt
+  err: invalid domain
+- mail: test . test@iana.org
+  note: deprecatedFWS
+  err: invalid character
+- mail: "\r\n test@iana.org"
+  note: cfwsFWS
+  err: invalid character
+- mail: "\r\n \r\n test@iana.org"
+  note: deprecatedFWS
+  err: invalid character
+- mail: "(\r"
+  note: errCRNoLF
+  err: invalid email
+- mail: (comment)test@iana.org
+  note: cfwsComment
+  err: invalid character
+- mail: ((comment)test@iana.org
+  note: errUnclosedComment
+  err: invalid character
+- mail: (comment(comment))test@iana.org
+  note: cfwsComment
+  err: invalid character
+- mail: test@(comment)iana.org
+  note: deprecatedCFWSNearAt
+  err: invalid domain
+- mail: test(comment)@iana.org
+  note: deprecatedCFWSNearAt
+  err: invalid character
+- mail: test(comment)test@iana.org
+  note: errATEXTAfterCFWS
+  err: invalid character
+- mail: test@(comment)[255.255.255.255]
+  note: deprecatedCFWSNearAt
+  err: invalid domain
+- mail: >-
+    (comment)abcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyzabcdefghiklm@iana.org
+  note: cfwsComment
+  err: local part too long
+- mail: >-
+    test@(comment)abcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyzabcdefg.com
+  note: deprecatedCFWSNearAt
+  err: invalid domain
+- mail: >-
+    (comment)test@abcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyzabcdefg.abcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyzabcdefg.abcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyzabcdefg.abcdefghijklmnopqrstuvwxyzabcdefghijk.abcdefghijklmnopqrst
+  note: cfwsComment
+  err: invalid character
+- mail: "\ntest@iana.org"
+  note: errExpectingATEXT
+  err: invalid character
+- mail: xn--test@iana.org
+  note: valid
+- mail: test@iana.org-
+  note: errDomainHyphenEnd
+  err: invalid domain characters
+- mail: '"test@iana.org'
+  note: errUnclosedQuotedString
+  err: invalid character
+- mail: (test@iana.org
+  note: errUnclosedComment
+  err: invalid character
+- mail: test@(iana.org
+  note: errUnclosedComment
+  err: invalid domain
+- mail: test@[1.2.3.4
+  note: errUnclosedDomainLiteral
+  err: invalid domain
+- mail: '"test\"@iana.org'
+  note: errUnclosedQuotedString
+  err: invalid character
+- mail: (comment\)test@iana.org
+  note: errUnclosedComment
+  err: invalid character
+- mail: test@iana.org(comment\)
+  note: errUnclosedComment
+  err: invalid domain
+- mail: test@iana.org(comment\
+  note: errBackslashEnd
+  err: invalid domain
+- mail: test@[RFC-5322-domain-literal]
+  note: rfc5322DomainLiteral
+  err: invalid domain
+- mail: test@[RFC-5322-郵件ñó-domain-literal]
+  note: errExpectingDTEXT
+  err: invalid domain
+- mail: test@[RFC-5322]-domain-literal]
+  note: errATEXTAfterDomainLiteral
+  err: invalid domain
+- mail: test@[RFC-5322].domain-literal]
+  note: errDotAfterDomainLiteral
+  err: invalid domain
+- mail: test@[RFC-5322-[domain-literal]
+  note: errExpectingDTEXT
+  err: invalid domain
+- mail: "test@[\x80"
+  note: errExpectingDTEXT
+  err: invalid domain
+- mail: "test@[\a]"
+  note: rfc5322DomainLiteralOBSDText
+  err: invalid domain
+- mail: "test@[RFC-5322-\\\a-domain-literal]"
+  note: rfc5322DomainLiteralOBSDText
+  err: invalid domain
+- mail: "test@[RFC-5322-\\\t-domain-literal]"
+  note: rfc5322DomainLiteralOBSDText
+  err: invalid domain
+- mail: test@[RFC-5322-\]-domain-literal]
+  note: rfc5322DomainLiteralOBSDText
+  err: invalid domain
+- mail: test@[RFC-5322-\郵-no-domain-literal]
+  note: errExpectingQPair
+  err: invalid domain
+- mail: "test@[RFC-5322-\x7F-domain-literal]"
+  note: rfc5322DomainLiteralOBSDText
+  err: invalid domain
+- mail: test@[RFC-5322-domain-literal\]
+  note: errUnclosedDomainLiteral
+  err: invalid domain
+- mail: test@[RFC-5322-domain-literal\
+  note: errBackslashEnd
+  err: invalid domain
+- mail: test@[RFC 5322 domain literal]
+  note: rfc5322DomainLiteral
+  err: invalid domain
+- mail: test@[RFC-5322-domain-literal] (comment)
+  note: rfc5322DomainLiteral
+  err: invalid domain
+- mail: "\x7F@iana.org"
+  note: errExpectingATEXT
+  err: invalid character
+- mail: "test@\x7F.org"
+  note: errExpectingATEXT
+  err: invalid domain
+- mail: "\"\x7F\"@iana.org"
+  note: deprecatedQTEXT
+  err: invalid character
+- mail: "\"\x80\"@iana.org"
+  note: errExpectingQTEXT
+  err: invalid character
+- mail: "\"\\\x7F\"@iana.org"
+  note: deprecatedQP
+  err: invalid character
+- mail: "(\x7F)test@iana.org"
+  note: deprecatedCTEXT
+  err: invalid character
+- mail: "(\x80)test@iana.org"
+  note: errExpectingCTEXT
+  err: invalid character
+- mail: "test@iana.org\r"
+  note: errCRNoLF
+  err: invalid domain
+- mail: "\rtest@iana.org"
+  note: errCRNoLF
+  err: invalid character
+- mail: "\"\rtest\"@iana.org"
+  note: errCRNoLF
+  err: invalid character
+- mail: "(\r)test@iana.org"
+  note: errCRNoLF
+  err: invalid character
+- mail: "test@iana.org(\r)"
+  note: errCRNoLF
+  err: invalid domain
+- mail: test@<iana>.org
+  note: errExpectingATEXT
+  err: invalid domain
+- mail: "\ntest@iana.org"
+  note: errExpectingATEXT
+  err: invalid character
+- mail: "\"\n\"@iana.org"
+  note: errExpectingQTEXT
+  err: invalid character
+- mail: "\"\\\n\"@iana.org"
+  note: deprecatedQP
+  err: invalid character
+- mail: "(\n)test@iana.org"
+  note: errExpectingCTEXT
+  err: invalid character
+- mail: "\a@iana.org"
+  note: errExpectingATEXT
+  err: invalid character
+- mail: "test@\a.org"
+  note: errExpectingATEXT
+  err: invalid domain
+- mail: "\"\a\"@iana.org"
+  note: deprecatedQTEXT
+  err: invalid character
+- mail: "\"\\\a\"@iana.org"
+  note: deprecatedQP
+  err: invalid character
+- mail: "(\a)test@iana.org"
+  note: deprecatedCTEXT
+  err: invalid character
+- mail: "\r\ntest@iana.org"
+  note: errFWSCRLFEnd
+  err: invalid character
+- mail: "\r\n \r\ntest@iana.org"
+  note: errFWSCRLFEnd
+  err: invalid character
+- mail: " \r\ntest@iana.org"
+  note: errFWSCRLFEnd
+  err: invalid character
+- mail: " \r\n test@iana.org"
+  note: cfwsFWS
+  err: invalid character
+- mail: " \r\n \r\ntest@iana.org"
+  note: errFWSCRLFEnd
+  err: invalid character
+- mail: " \r\n\r\ntest@iana.org"
+  note: errFWSCRLFx2
+  err: invalid character
+- mail: " \r\n\r\n test@iana.org"
+  note: errFWSCRLFx2
+  err: invalid character
+- mail: "test@iana.org\r\n "
+  note: cfwsFWS
+  err: invalid domain
+- mail: "test@iana.org\r\n \r\n "
+  note: deprecatedFWS
+  err: invalid domain
+- mail: "test@iana.org\r\n"
+  note: errFWSCRLFEnd
+  err: invalid domain
+- mail: "test@iana.org \r"
+  note: errCRNoLF
+  err: invalid domain
+- mail: "test@iana.org\r\n \r\n"
+  note: errFWSCRLFEnd
+  err: invalid domain
+- mail: "test@iana.org \r\n"
+  note: errFWSCRLFEnd
+  err: invalid domain
+- mail: "test@iana.org \r\n "
+  note: cfwsFWS
+  err: invalid domain
+- mail: "test@iana.org \r\n \r\n"
+  note: errFWSCRLFEnd
+  err: invalid domain
+- mail: "test@iana.org \r\n\r\n"
+  note: errFWSCRLFx2
+  err: invalid domain
+- mail: "test@iana.org \r\n\r\n "
+  note: errFWSCRLFx2
+  err: invalid domain
+- mail: test@iana. org
+  note: deprecatedFWS
+  err: invalid domain
+- mail: "test@[\r"
+  note: errCRNoLF
+  err: invalid domain
+- mail: "test@[\r\n"
+  note: errFWSCRLFEnd
+  err: invalid domain
+- mail: ' test@iana.org'
+  note: cfwsFWS
+  err: invalid character
+- mail: 'test@iana.org '
+  note: cfwsFWS
+  err: invalid domain
+- mail: test@[IPv6:1::2:]
+  note: rfc5322IPv6ColonEnd
+  err: invalid domain
+- mail: "\"test\\\x94\"@iana.org"
+  note: errExpectingQPair
+  err: invalid character
+- mail: test@iana/icann.org
+  note: rfc5322Domain
+  err: invalid domain
+- mail: test@iana!icann.org
+  note: rfc5322Domain
+  err: invalid domain
+- mail: test@iana?icann.org
+  note: rfc5322Domain
+  err: invalid domain
+- mail: test@iana^icann.org
+  note: rfc5322Domain
+  err: invalid domain
+- mail: test@iana{icann}.org
+  note: rfc5322Domain
+  err: invalid domain character
+- mail: test.(comment)test@iana.org
+  note: deprecatedComment
+  err: invalid character
+- mail: test@iana.(comment)org
+  note: deprecatedComment
+  err: invalid domain
+- mail: test@iana(comment)iana.org
+  note: errATEXTAfterCFWS
+  err: invalid domain
+- mail: "(comment\r\n comment)test@iana.org"
+  note: cfwsFWS
+  err: invalid character
+- mail: test@org
+  note: valid
+  err: less than 2 domain segments
+- mail: "test\uD800@invalid"
+  note: errMalformedUnicode
+  err: forbidden unicode
+  opts:
+    ascii: true
+- mail: "\"\uD800\"@invalid"
+  note: errMalformedUnicode
+  err: invalid character
+- mail: "\"\\\uD800\"@invalid"
+  note: errMalformedUnicode
+  err: invalid character
+- mail: "(\uD800)thing@invalid"
+  note: cfwsComment
+  err: invalid character
+- mail: "\"\\\uD800\"@invalid"
+  note: errMalformedUnicode
+  err: invalid character
+- mail: >-
+    test@𐏿ñoñó郵件ñoñó郵件.郵件ñoñó郵件ñoñó郵件.ñoñó郵件ñoñó郵件.ñoñó郵件ñoñó郵件.ñoñó郵件ñoñó郵件.ñoñó郵件ñoñó郵件.ñoñó郵件ñoñó郵件.noñó郵件.商務
+  note: valid
+  err: invalid domain
+  todo: "why is domain valid? URL() can't parse it"
+- mail: >-
+    test@𐏿ñoñó郵件ñoñó郵件.郵件ñoñó郵件ñoñó郵件.ñoñó郵件ñoñó郵件.ñoñó郵件ñoñó郵件.ñoñó郵件ñoñó郵件.ñoñó郵件ñoñó郵件.ñoñó郵件ñoñó郵件.noñó郵件ñoñó郵.商務
+  note: rfc5322TooLong
+  err: invalid domain
+  todo: "why is domain valid? URL() can't parse it"
+- mail: >-
+    test@𐏿ñoñó郵件ñoñó郵件.郵件ñoñó郵件ñoñó郵件.ñoñó郵件ñoñó郵件ñoñó郵件.ñoñó郵件ñoñó郵件.ñoñó郵件ñoñó郵件.ñoñó郵件ñoñó郵件.ñoñó郵件ñoñó郵件.ñoñó郵件ñoñó郵件.oñó郵件ñoñó郵件ñoñó郵件.商務
+  note: rfc5322DomainTooLong
+  err: email too long
+- mail: >-
+    test@ñoñoñó郵件😆ñoñ.oñó郵件세ñoñ.oñó郵件ل们čñoñoñó郵件לño.ñoñó郵件य本ñoñoñó郵件세añoñ.oñó郵件😆bc세郵😆ño.ñoñó郵件ñoñoñó郵件😆ñoñoñó郵件세ñoñ.oñó郵件ل们ñoñoñó.郵件😆ñoñoñó郵件郵세ñoñoñó郵件ل们ñoñoñó郵件.😆ñoñoñó郵件郵세ل们.郵件😆ñoñoñó郵.件郵세们😆ñoñoñó件郵세ñoñoñó郵件
+  note: rfc5322DomainTooLong
+  err: email too long
+- mail: >-
+    test@ñoñó郵件ñoñó郵件ñoñó郵件ñoñoñó郵件ñoñó郵件ñoñó郵件ñoñó郵件ñoñó郵件ñoñó郵件ñoñó郵件ñoñó郵件ñoñó郵件ñoñó郵件ñoñó郵件ñoñó郵件ñoñó郵件ñoñó郵件ñoñó郵件ñoñó郵件ñoñó郵件ñoñó郵件ñoñó郵件ñoñó郵件ñoñó郵件ñoñó郵件ñoñó郵件ñoñó郵件ñoñó郵件ñoñó郵件ñoñó郵件ñoñó郵件ñoñó郵件ñoñó郵件ñoñó郵件ñoñó郵件ñoñó郵件ñoñó郵件ñoñó郵件ñoñó郵件ñoñó郵件ñoñó郵件ñoñó郵件ñoñó郵件.商務
+  note: rfc5322LabelTooLong
+  err: string too long max=255
+- mail: >-
+    😆ñoñó郵件ñoñó郵件ñoñó😆郵件ñoñoñó郵@😆郵件ñoñó郵件ñoñó.😆郵件ñoñó郵件ñoñó.😆郵件ñoñó郵件ñoñó.郵件ñoñó郵件ñoñó😆.郵件ñoñó郵件ñoñó.郵件ñoñó郵件.ñoñó郵件ñoñó.郵件ñoñó郵件.😆郵件ñoñó郵件ñoñó.😆郵件ñoñó郵件ñoñó.😆商務.郵件ñoñó郵件ñoñó郵件.😆商務.😆商務.😆商務
+  note: rfc5322DomainTooLong
+  err: email too long
+# @credits https://github.com/JoshData/python-email-validator/blob/main/tests/test_syntax.py
+# @license Unlicense
+- mail: 'Abc@example.tld'
+- mail: 'Abc.123@test-example.com'
+- mail: 'user+mailbox/department=shipping@example.tld'
+- mail: "!#$%&'*+-/=?^_`.{|}~@example.tld"
+- mail: 'jeff@臺網中心.tw'
+- mail: '"quoted local part"@example.org'
+  err: invalid character
+- mail: '"de-quoted.local.part"@example.org'
+  err: invalid character
+- mail: '伊昭傑@郵件.商務'
+- mail: 'राम@मोहन.ईन्फो'
+- mail: 'юзер@екзампл.ком'
+- mail: 'θσερ@εχαμπλε.ψομ'
+- mail: '葉士豪@臺網中心.tw'
+- mail: '葉士豪@臺網中心.台灣'
+- mail: 'jeff葉@臺網中心.tw'
+- mail: 'ñoñó@example.tld'
+- mail: '我買@example.tld'
+- mail: '甲斐黒川日本@example.tld'
+- mail: 'чебурашкаящик-с-апельсинами.рф@example.tld'
+- mail: 'उदाहरण.परीक्ष@domain.with.idn.tld'
+- mail: 'ιωάννης@εεττ.gr'
+- mail: '"unnecessarily.quoted.local.part"@example.com'
+  err: invalid character
+- mail: '"quoted..local.part"@example.com'
+  err: invalid character
+- mail: '"quoted.with.at@"@example.com'
+  err: multiple @ chars
+- mail: '"quoted with space"@example.com'
+  err: invalid character
+- mail: '"quoted.with.dquote\\""@example.com'
+  err: invalid character
+- mail: '"unnecessarily.quoted.with.unicode.λ"@example.com'
+  err: invalid character
+- mail: '"quoted.with..unicode.λ"@example.com'
+  err: invalid character
+- mail: '"quoted.with.extraneous.\\escape"@example.com'
+  err: invalid character
+- mail: 'my@localhost'
+  note: 'The part after the @-sign is not valid. It should have a period.'
+  opts:
+    minDomainSegments: 1
+- mail: 'my@.leadingdot.com'
+  note: 'An email address cannot have a period immediately after the @-sign.'
+  err: empty domain segment
+- mail: 'my@．leadingfwdot.com'
+  note: 'An email address cannot have a period immediately after the @-sign.'
+  err: empty domain segment
+- mail: 'my@twodots..com'
+  note: 'An email address cannot have two periods in a row.'
+  err: empty domain segment
+- mail: 'my@twofwdots．．.com'
+  note: 'An email address cannot have two periods in a row.'
+  err: empty domain segment
+- mail: 'my@trailingdot.com.'
+  note: 'An email address cannot end with a period.'
+  err: empty domain segment
+- mail: 'my@trailingfwdot.com．'
+  note: 'An email address cannot end with a period.'
+  err: empty domain segment
+- mail: 'me@-leadingdash'
+  note: 'An email address cannot have a hyphen immediately after the @-sign.'
+  opts:
+    minDomainSegments: 1
+  err: invalid domain characters
+- mail: 'me@－leadingdashfw'
+  note: 'An email address cannot have a hyphen immediately after the @-sign.'
+  opts:
+    minDomainSegments: 1
+  err: invalid domain characters
+- mail: 'me@trailingdash-'
+  note: 'An email address cannot end with a hyphen.'
+  opts:
+    minDomainSegments: 1
+  err: invalid domain characters
+- mail: 'me@trailingdashfw－'
+  note: 'An email address cannot end with a hyphen.'
+  opts:
+    minDomainSegments: 1
+  err: invalid domain characters
+- mail: 'my@baddash.-.com'
+  note: 'An email address cannot have a period and a hyphen next to each other.'
+  err: invalid domain characters
+- mail: 'my@baddash.-a.com'
+  note: 'An email address cannot have a period and a hyphen next to each other.'
+  err: invalid domain characters
+- mail: 'my@baddash.b-.com'
+  note: 'An email address cannot have a period and a hyphen next to each other.'
+  err: invalid domain characters
+- mail: 'my@baddashfw.－.com'
+  note: 'An email address cannot have a period and a hyphen next to each other.'
+  err: invalid domain characters
+- mail: 'my@baddashfw.－a.com'
+  note: 'An email address cannot have a period and a hyphen next to each other.'
+  err: invalid domain characters
+- mail: 'my@baddashfw.b－.com'
+  note: 'An email address cannot have a period and a hyphen next to each other.'
+  err: invalid domain characters
+- mail: 'my@example.com\n'
+  note: 'The part after the @-sign contains invalid characters: U+000A.'
+  err: invalid domain
+- mail: 'my@example\n.com'
+  note: 'The part after the @-sign contains invalid characters: U+000A.'
+  err: invalid domain
+- mail: 'me@x!'
+  note: 'The part after the @-sign contains invalid characters: !.'
+  err: invalid domain
+- mail: 'me@x '
+  note: 'The part after the @-sign contains invalid characters: SPACE.'
+  err: invalid domain
+- mail: '.leadingdot@domain.com'
+  note: 'An email address cannot start with a period.'
+  err: empty local segment
+- mail: 'twodots..here@domain.com'
+  note: 'An email address cannot have two periods in a row.'
+  err: empty local segment
+- mail: 'trailingdot.@domain.email'
+  note: 'An email address cannot have a period immediately before the @-sign.'
+  err: empty local segment
+- mail: 'me@⒈wouldbeinvalid.com'
+  note: "The part after the @-sign contains invalid characters (Codepoint U+2488 not allowed at position 1 in '⒈wouldbeinvalid.com')."
+  err: invalid domain
+- mail: '@example.com'
+  note: 'There must be something before the @-sign.'
+  err: empty local segment
+- mail: 'white space@test'
+  note: 'The email address contains invalid characters before the @-sign: SPACE.'
+  err: invalid character
+- mail: 'test@white space'
+  note: 'The part after the @-sign contains invalid characters: SPACE.'
+  err: invalid domain
+- mail: '\nmy@example.com'
+  note: 'The email address contains invalid characters before the @-sign: U+000A.'
+  err: invalid character
+- mail: 'm\ny@example.com'
+  note: 'The email address contains invalid characters before the @-sign: U+000A.'
+  err: invalid character
+- mail: 'my\n@example.com'
+  note: 'The email address contains invalid characters before the @-sign: U+000A.'
+  err: invalid character
+- mail: 'test@\n'
+  note: 'The part after the @-sign contains invalid characters: U+000A.'
+  err: invalid domain
+- mail: 'bad"quotes"@example.com'
+  note: 'The email address contains invalid characters before the @-sign'
+  err: invalid character
+- mail: 'obsolete."quoted".atom@example.com'
+  note: 'The email address contains invalid characters before the @-sign'
+  err: invalid character
+- mail: '11111111112222222222333333333344444444445555555555666666666677777@example.com'
+  note: 'The email address is too long before the @-sign (1 character too many).'
+  err: local part too long
+- mail: '111111111122222222223333333333444444444455555555556666666666777777@example.com'
+  note: 'The email address is too long before the @-sign (2 characters too many).'
+  err: local part too long
+- mail: 'me@1111111111222222222233333333334444444444555555555.6666666666777777777788888888889999999999000000000.1111111111222222222233333333334444444444555555555.6666666666777777777788888888889999999999000000000.111111111122222222223333333333444444444455555555556.com'
+  note: 'The email address is too long (4 characters too many).'
+  err: string too long max=255
+- mail: 'me@1111111111222222222233333333334444444444555555555.6666666666777777777788888888889999999999000000000.1111111111222222222233333333334444444444555555555.6666666666777777777788888888889999999999000000000.1111111111222222222233333333334444444444555555555566.com'
+  note: 'The email address is too long after the @-sign (1 character too many).'
+  err: string too long max=255
+- mail: 'me@中1111111111222222222233333333334444444444555555555.6666666666777777777788888888889999999999000000000.1111111111222222222233333333334444444444555555555.6666666666777777777788888888889999999999000000000.1111111111222222222233333333334444444444555555555566.com'
+  note: 'The email address is too long after the @-sign.'
+  err: string too long max=255
+- mail: 'my.long.address@1111111111222222222233333333334444444444555555555.6666666666777777777788888888889999999999000000000.1111111111222222222233333333334444444444555555555.6666666666777777777788888888889999999999000000000.11111111112222222222333333333344444.info'
+  note: 'The email address is too long (2 characters too many).'
+  err: string too long max=255
+- mail: 'my.long.address@λ111111111222222222233333333334444444444555555555.6666666666777777777788888888889999999999000000000.1111111111222222222233333333334444444444555555555.6666666666777777777788888888889999999999000000000.11111111112222222222333333.info'
+  note: 'The email address is too long (when converted to IDNA ASCII).'
+  ok: verified IMO passing is correct as domain part is 239 chars
+- mail: 'my.long.address@λ111111111222222222233333333334444444444555555555.6666666666777777777788888888889999999999000000000.1111111111222222222233333333334444444444555555555.6666666666777777777788888888889999999999000000000.1111111111222222222233333333334444.info'
+  note: 'The email address is too long (at least 1 character too many).'
+  err: email too long
+- mail: 'my.λong.address@1111111111222222222233333333334444444444555555555.6666666666777777777788888888889999999999000000000.1111111111222222222233333333334444444444555555555.6666666666777777777788888888889999999999000000000.111111111122222222223333333333444.info'
+  note: 'The email address is too long (when encoded in bytes).'
+  err: email too long
+- mail: 'my.λong.address@1111111111222222222233333333334444444444555555555.6666666666777777777788888888889999999999000000000.1111111111222222222233333333334444444444555555555.6666666666777777777788888888889999999999000000000.1111111111222222222233333333334444.info'
+  note: 'The email address is too long (at least 1 character too many).'
+  err: email too long
+- mail: 'me@bad-tld-1'
+  note: 'The part after the @-sign is not valid. It should have a period.'
+  err: less than 2 domain segments
+- mail: 'me@bad.tld-2'
+  note: 'The part after the @-sign is not valid. It is not within a valid top-level domain.'
+  # err: invalid email
+  todo: IMO ok spec does not state that TLD should not contain hyphens
+- mail: 'me@xn--0.tld'
+  note: 'The part after the @-sign is not valid IDNA (Invalid A-label).'
+  err: invalid domain
+- mail: 'me@yy--0.tld'
+  note: 'An email address cannot have two letters followed by two dashes immediately after the @-sign or after a period, except Punycode.'
+  err: invalid domain characters
+- mail: 'me@yy－－0.tld'
+  note: 'An email address cannot have two letters followed by two dashes immediately after the @-sign or after a period, except Punycode.'
+  err: invalid domain characters
+- mail: 'me@[127.0.0.1]'
+  note: 'A bracketed IP address after the @-sign is not allowed here.'
+  err: invalid domain
+- mail: 'me@[127.0.0.999]'
+  note: 'The address in brackets after the @-sign is not valid: It is not an IPv4 address (Octet 999 (> 255) not permitted in 127.0.0.999) or is missing an address literal tag.'
+  err: invalid domain
+- mail: 'me@[IPv6:::1]'
+  note: 'A bracketed IP address after the @-sign is not allowed here.'
+  err: invalid domain
+- mail: 'me@[IPv6:::G]'
+  note: "The IPv6 address in brackets after the @-sign is not valid (Only hex digits permitted in 'G' in '::G')."
+  err: invalid domain
+- mail: 'me@[tag:text]'
+  note: 'The part after the @-sign contains an invalid address literal tag in brackets.'
+  err: invalid domain
+- mail: 'me@[untaggedtext]'
+  note: 'The part after the @-sign in brackets is not an IPv4 address and has no address literal tag.'
+  err: invalid domain
+- mail: 'me@[tag:invalid space]'
+  note: 'The part after the @-sign contains invalid characters in brackets: SPACE.'
+  err: invalid domain

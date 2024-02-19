@@ -1,3 +1,5 @@
+import { validateEmail, validateHostname } from './email.js'
+
 /**
  * @typedef {{
  *  message?: string
@@ -6,9 +8,8 @@
  *  additionalProps?: string[][]
  * }} ValidationFailure
  */
-/**
- * @typedef {(v: any, e?: ValidationFailure) => boolean} ValidationFn
- */
+/** @typedef {(v: any, e?: ValidationFailure) => boolean} ValidationFn */
+/** @typedef {import('./email').EmailDomainValidationOptions } EmailDomainValidationOptions */
 
 /**
  * shortcut for { required: true }
@@ -418,6 +419,11 @@ export class DateT extends NumberT {
  */
 export const dateT = (opts) => new DateT(opts)
 
+/*
+  for json schema formats see
+  https://json-schema.org/understanding-json-schema/reference/string
+*/
+
 export class StringT extends BaseT {
   type = 'string'
   _min = 0
@@ -490,12 +496,20 @@ export class StringT extends BaseT {
     return this._minMax(undefined, max)
   }
 
+  /**
+   * validates url
+   * @returns {this}
+   */
   url () {
     this._validate = validateUrl
-    this.format = 'url'
+    this.format = 'uri'
     return this
   }
 
+  /**
+   * validate uuid; does not check on uuid version byte
+   * @returns {this}
+   */
   uuid () {
     this._validate = validateUuid
     this.format = 'uuid'
@@ -503,9 +517,35 @@ export class StringT extends BaseT {
     return this
   }
 
+  /**
+   * expects string to be a date
+   * @returns {this}
+   */
   dateTime () {
     this._validate = validateDateTime
     this.format = 'date-time'
+    return this
+  }
+  /**
+   * RFC6531 or RFC5321 (ascii=true) email validation
+   * @note No support for quoted emails
+   * @param {EmailDomainValidationOptions} [options]
+   * @returns {this}
+   */
+  email (options) {
+    this._validate = validateEmail(options)
+    this.format = options?.ascii ? 'email' : 'idn-email'
+    return this
+  }
+
+  /**
+   * RFC5890 or RFC1123 (ascii=true) Hostname validation
+   * @param {EmailDomainValidationOptions} [options]
+   * @returns {this}
+   */
+  hostname (options) {
+    this._validate = validateHostname(options)
+    this.format = options?.ascii ? 'hostname' : 'idn-hostname'
     return this
   }
 

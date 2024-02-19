@@ -1,3 +1,9 @@
+# 0.6.0 (2024-02-19)
+
+### feat:
+
+- email and hostname validation (#1c0a1f3)
+
 # 0.5.0 (2024-02-18)
 
 ### feat:

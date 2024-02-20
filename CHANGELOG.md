@@ -1,3 +1,14 @@
+# 0.7.0 (2024-02-20)
+
+### BREAKING CHANGE:
+
+- string formats separated from validate.js to allow smaller core
+- ipv4, ipv6, date, time string format (#5d84d83)
+
+### fix:
+
+- linter issue (#d3e142c)
+
 # 0.6.0 (2024-02-19)
 
 ### feat:

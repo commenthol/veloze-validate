@@ -1,4 +1,4 @@
-import { validateDateTime } from './validate.js'
+import { validateDateTime } from './stringFormat.js'
 
 /** @typedef {import('./validate.js').ValidationFn} ValidationFn */
 

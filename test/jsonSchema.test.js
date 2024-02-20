@@ -2,6 +2,7 @@ import assert, { deepEqual } from 'assert/strict'
 import {
   toJsonSchema,
   type as t,
+  stringFormatT,
   oneOf,
   anyOf,
   allOf,
@@ -101,21 +102,21 @@ describe('jsonSchema', function () {
   })
 
   it('convert string formats', function () {
-    deepEqual(toJsonSchema(t.string().url()), {
+    deepEqual(toJsonSchema(stringFormatT().url()), {
       type: 'string',
       format: 'uri',
       minLength: 0,
       maxLength: 255
     })
 
-    deepEqual(toJsonSchema(t.string().dateTime()), {
+    deepEqual(toJsonSchema(stringFormatT().dateTime()), {
       type: 'string',
       format: 'date-time',
       minLength: 0,
       maxLength: 255
     })
 
-    deepEqual(toJsonSchema(t.string().uuid()), {
+    deepEqual(toJsonSchema(stringFormatT().uuid()), {
       type: 'string',
       format: 'uuid',
       minLength: 0,

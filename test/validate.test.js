@@ -1,5 +1,3 @@
-import fs from 'fs'
-import yaml from 'js-yaml'
 import assert, { equal, deepEqual } from 'assert/strict'
 import {
   booleanT,
@@ -18,8 +16,6 @@ import {
   not,
   ValidationError
 } from '../src/index.js'
-
-const emailFixtures = yaml.load(fs.readFileSync(new URL('./fixtures/email.yaml', import.meta.url), 'utf-8'))
 
 describe('validate', function () {
   describe('REQUIRED', function () {
@@ -343,46 +339,6 @@ describe('validate', function () {
       const e = {}
       equal(schema.validate('not', e), false)
       equal(e.message, 'string validate failed')
-    })
-
-    it('url validation', function () {
-      equal(stringT().url().validate('https://foo.bar/path?a=1?b=2'), true)
-      const e = {}
-      equal(stringT().url().validate('/foo.bar/path', e), false)
-      deepEqual(e, { message: 'string is not an url' })
-    })
-
-    it('date validation', function () {
-      equal(stringT().dateTime().validate('2020-12-01'), true)
-      const e = {}
-      equal(stringT().dateTime().validate('/foo.bar/path', e), false)
-      deepEqual(e, { message: 'string is not a date-time' })
-    })
-
-    it('uuid validation', function () {
-      equal(
-        stringT().uuid().validate('641663d3-4689-4ab0-842d-11fe8bfcfb17'),
-        true
-      )
-      const e = {}
-      equal(
-        stringT().uuid().validate('641663d3-4689-4ab0-842x-11fe8bfcfb17', e),
-        false
-      )
-      deepEqual(e, { message: 'string is not an uuid' })
-    })
-  })
-
-  describe('stringT() email validation', function () {
-    emailFixtures.forEach(({ test, mail, err, opts, only }) => {
-      const fn = only ? it.only : it
-      fn(test || JSON.stringify(mail), function () {
-        const e = {}
-        const actual = stringT().required().email(opts).validate(mail, e)
-        assert.equal(actual, !err)
-        // console.log(e)
-        e.message && assert.equal(e.message, err)
-      })
     })
   })
 

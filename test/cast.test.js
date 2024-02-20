@@ -4,7 +4,7 @@ import {
   booleanT,
   numberT,
   integerT,
-  stringT,
+  stringFormatT as stringT,
   enumT,
   arrayT,
   objectT,

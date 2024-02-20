@@ -1,5 +1,3 @@
-import { validateEmail, validateHostname } from './email.js'
-
 /**
  * @typedef {{
  *  message?: string
@@ -9,7 +7,6 @@ import { validateEmail, validateHostname } from './email.js'
  * }} ValidationFailure
  */
 /** @typedef {(v: any, e?: ValidationFailure) => boolean} ValidationFn */
-/** @typedef {import('./email').EmailDomainValidationOptions } EmailDomainValidationOptions */
 
 /**
  * shortcut for { required: true }
@@ -497,60 +494,6 @@ export class StringT extends BaseT {
   }
 
   /**
-   * validates url
-   * @returns {this}
-   */
-  url () {
-    this._validate = validateUrl
-    this.format = 'uri'
-    return this
-  }
-
-  /**
-   * validate uuid; does not check on uuid version byte
-   * @returns {this}
-   */
-  uuid () {
-    this._validate = validateUuid
-    this.format = 'uuid'
-    this._minLength = this._maxLength = undefined
-    return this
-  }
-
-  /**
-   * expects string to be a date
-   * @returns {this}
-   */
-  dateTime () {
-    this._validate = validateDateTime
-    this.format = 'date-time'
-    return this
-  }
-
-  /**
-   * RFC6531 or RFC5321 (ascii=true) email validation
-   * @note No support for quoted emails
-   * @param {EmailDomainValidationOptions} [options]
-   * @returns {this}
-   */
-  email (options) {
-    this._validate = validateEmail(options)
-    this.format = options?.ascii ? 'email' : 'idn-email'
-    return this
-  }
-
-  /**
-   * RFC5890 or RFC1123 (ascii=true) Hostname validation
-   * @param {EmailDomainValidationOptions} [options]
-   * @returns {this}
-   */
-  hostname (options) {
-    this._validate = validateHostname(options)
-    this.format = options?.ascii ? 'hostname' : 'idn-hostname'
-    return this
-  }
-
-  /**
    * @param {RegExp} pattern
    */
   pattern (pattern) {
@@ -572,52 +515,6 @@ export class StringT extends BaseT {
  * }} [opts]
  */
 export const stringT = (opts) => new StringT(opts)
-/**
- * @param {string} string
- * @param {ValidationFailure} [e]
- * @returns {boolean}
- */
-export const validateUrl = (string, e = {}) => {
-  try {
-    return !!new URL(string)
-  } catch (_) {
-    e.message = 'string is not an url'
-    return false
-  }
-}
-
-/**
- * @param {string} string
- * @param {ValidationFailure} [e]
- * @returns {boolean}
- */
-export const validateDateTime = (string, e = {}) => {
-  const d = new Date(string)
-  if (isNaN(d.getTime())) {
-    e.message = 'string is not a date-time'
-    return false
-  }
-  return true
-}
-
-/**
- * a not so strict UUID check (does not check for uuid version byte)
- */
-const UUID_RE =
-  /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
-
-/**
- * @param {string} string
- * @param {ValidationFailure} [e]
- * @returns {boolean}
- */
-export const validateUuid = (string, e = {}) => {
-  if (string.length !== 36 || !UUID_RE.test(string)) {
-    e.message = 'string is not an uuid'
-    return false
-  }
-  return true
-}
 
 export class EnumT extends BaseT {
   type = 'enum'

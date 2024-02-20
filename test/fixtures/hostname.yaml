@@ -1,0 +1,44 @@
+- test: ok - valid host
+  host: test.tld
+- test: ok - international domain
+  host: tëst.tld
+- test: must not be empty
+  host: ''
+  err: invalid domain
+- test: must not contain @ char
+  host: test@test
+  err: invalid domain
+- test: domain must have 2 segments min
+  host: test
+  err: less than 2 domain segments
+- test: domain contains empty segment
+  host: test..tld
+  err: empty domain segment
+- test: domain segment too long
+  host: test.1234567890123456789012345678901234567890123456789012345678901234.tld
+  err: domain segment too long
+- test: domain invalid character
+  host: test_.tld
+  err: invalid domain character
+- test: domain invalid hyphen at start
+  host: -test.tld
+  err: invalid domain characters
+- test: domain invalid hyphen at end
+  host: test-.tld
+  err: invalid domain characters
+- test: domain invalid double hyphens
+  host: te--st.tld
+  err: invalid domain characters
+- test: international domain
+  host: 😀🥳🤩🥸🤨🧐🤓😎🤪😜😝😛😗😙😚😋😘🥰😍😌😇🙂🙃😉😊☺️🥲🤣😆🥹😅😂.😀🥳🤩🥸🤨🧐🤓😎🤪😜😝😛😗😙😚😋😘🥰😍😌😇🙂🙃😉😊☺️🥲🤣😆🥹😅😂.😀🥳🤩🥸🤨🧐🤓😎🤪😜😝😛😗😙😚😋😘🥰😍😌😇🙂🙃😉😊☺️🥲🤣😆🥹😅😂.😀🥳🤩🥸🤨🧐🤓😎🤪😜😝😛😗😙😚😋😘🥰😍😌😇🙂🙃😉😊☺️🥲🤣😆🥹.tld
+  err: domain too long
+  max: 260
+- test: international domain part too long
+  host: 😀🥳🤩🥸🤨🧐🤓😎🤪😜😝😛😗😙😚😋😘🥰😍😌😇🙂🙃😉😊☺️🥲🤣😆🥹😅😂😀.tld
+  err: domain segment too long
+# RFC5321
+- test: RFC5321 - unicode domain
+  host: tëst.tld
+  err: forbidden unicode
+  opts:
+    ascii: true

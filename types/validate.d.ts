@@ -13,7 +13,6 @@ export function not(): void;
  * }} ValidationFailure
  */
 /** @typedef {(v: any, e?: ValidationFailure) => boolean} ValidationFn */
-/** @typedef {import('./email').EmailDomainValidationOptions } EmailDomainValidationOptions */
 /**
  * shortcut for { required: true }
  * @example
@@ -174,37 +173,6 @@ export class StringT extends BaseT {
      */
     max(max: number): this;
     /**
-     * validates url
-     * @returns {this}
-     */
-    url(): this;
-    format: string | undefined;
-    /**
-     * validate uuid; does not check on uuid version byte
-     * @returns {this}
-     */
-    uuid(): this;
-    _minLength: any;
-    _maxLength: any;
-    /**
-     * expects string to be a date
-     * @returns {this}
-     */
-    dateTime(): this;
-    /**
-     * RFC6531 or RFC5321 (ascii=true) email validation
-     * @note No support for quoted emails
-     * @param {EmailDomainValidationOptions} [options]
-     * @returns {this}
-     */
-    email(options?: import("./email.js").EmailDomainValidationOptions | undefined): this;
-    /**
-     * RFC5890 or RFC1123 (ascii=true) Hostname validation
-     * @param {EmailDomainValidationOptions} [options]
-     * @returns {this}
-     */
-    hostname(options?: import("./email.js").EmailDomainValidationOptions | undefined): this;
-    /**
      * @param {RegExp} pattern
      */
     pattern(pattern: RegExp): this;
@@ -216,9 +184,6 @@ export function stringT(opts?: {
     pattern?: RegExp | undefined;
     validate?: ((v: string, e?: ValidationFailure) => boolean) | undefined;
 } | undefined): StringT;
-export function validateUrl(string: string, e?: ValidationFailure | undefined): boolean;
-export function validateDateTime(string: string, e?: ValidationFailure | undefined): boolean;
-export function validateUuid(string: string, e?: ValidationFailure | undefined): boolean;
 export class EnumT extends BaseT {
     constructor(list: any, opts: any);
     type: string;
@@ -311,4 +276,3 @@ export type ValidationFailure = {
     additionalProps?: string[][];
 };
 export type ValidationFn = (v: any, e?: ValidationFailure) => boolean;
-export type EmailDomainValidationOptions = import('./email').EmailDomainValidationOptions;

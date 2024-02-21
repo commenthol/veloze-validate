@@ -78,6 +78,23 @@ export class BaseT {
   /** @type {any} */
   _default
 
+  /**
+   * @protected
+   * clone schema
+   * @param {BaseT} T class
+   * @param {...any} arg arguments
+   */
+  // @ts-expect-error
+  _clone (T = BaseT, ...arg) {
+    // @ts-expect-error
+    const clone = new T(...arg)
+    for (const [key, value] of Object.entries(this)) {
+      if (key[0] !== '_') continue
+      clone[key] = value
+    }
+    return clone
+  }
+
   required () {
     this._required = true
     return this
@@ -162,6 +179,15 @@ export class BooleanT extends BaseT {
   }
 
   /**
+   * clones the schema
+   * @returns {BooleanT}
+   */
+  clone () {
+    // @ts-expect-error
+    return super._clone(BooleanT)
+  }
+
+  /**
    * @param {any} v
    * @param {ValidationFailure} [e]
    * @returns {boolean}
@@ -209,6 +235,15 @@ export class NumberT extends BaseT {
     if (_min >= _max) {
       throw RangeError('min, max issue')
     }
+  }
+
+  /**
+   * clones the schema
+   * @returns {NumberT}
+   */
+  clone () {
+    // @ts-expect-error
+    return super._clone(NumberT)
   }
 
   validate (v, e = {}) {
@@ -282,6 +317,15 @@ export class IntegerT extends NumberT {
     addOpts(this, opts)
   }
 
+  /**
+   * clones the schema
+   * @returns {IntegerT}
+   */
+  clone () {
+    // @ts-expect-error
+    return super._clone(IntegerT)
+  }
+
   validate (v, e = {}) {
     const { _required } = this
     if (!_required && v === undefined) {
@@ -347,6 +391,16 @@ export class DateT extends NumberT {
     // @ts-expect-error
     this._max = _max
     return this
+  }
+
+  /**
+   * clones the schema
+   * @returns {DateT}
+   */
+  // @ts-expect-error
+  clone () {
+    // @ts-expect-error
+    return super._clone(DateT)
   }
 
   validate (v, e = {}) {
@@ -451,6 +505,15 @@ export class StringT extends BaseT {
     return this
   }
 
+  /**
+   * clones the schema
+   * @returns {StringT}
+   */
+  clone () {
+    // @ts-expect-error
+    return super._clone(StringT)
+  }
+
   validate (v, e = {}) {
     const { _required, _min, _max, _pattern, _validate } = this
     if (!_required && (v === undefined || v === '')) {
@@ -529,6 +592,15 @@ export class EnumT extends BaseT {
     this._list = list
   }
 
+  /**
+   * clones the schema
+   * @returns {EnumT}
+   */
+  clone () {
+    // @ts-expect-error
+    return super._clone(EnumT, this._list)
+  }
+
   validate (v, e = {}) {
     const { _required, _list } = this
     if (!_required && v === undefined) {
@@ -569,6 +641,15 @@ export class ArrayT extends BaseT {
       throw TypeError('schema expected')
     }
     this._schema = schema
+  }
+
+  /**
+   * clones the schema
+   * @returns {ArrayT}
+   */
+  clone () {
+    // @ts-expect-error
+    return super._clone(ArrayT, this._schema)
   }
 
   validate (v, e = {}) {
@@ -637,6 +718,15 @@ export class ObjectT extends BaseT {
       throw RangeError('min, max issue')
     }
     this._schema = schema
+  }
+
+  /**
+   * clones the schema
+   * @returns {ObjectT}
+   */
+  clone () {
+    // @ts-expect-error
+    return super._clone(ObjectT, this._schema)
   }
 
   validate (v, e = {}) {
@@ -721,6 +811,14 @@ export class OneOf {
     this._schemas = schemas
   }
 
+  /**
+   * clones the schema
+   * @returns {OneOf}
+   */
+  clone () {
+    return new OneOf(this._schemas)
+  }
+
   validate (v, e = {}) {
     let matched = 0
     for (const schema of this._schemas) {
@@ -749,6 +847,14 @@ export class AnyOf {
       throw TypeError('schema array expected')
     }
     this._schemas = schemas
+  }
+
+  /**
+   * clones the schema
+   * @returns {AnyOf}
+   */
+  clone () {
+    return new AnyOf(this._schemas)
   }
 
   validate (v, e = {}) {
@@ -780,6 +886,14 @@ export class AllOf {
       throw TypeError('schema array expected')
     }
     this._schemas = schemas
+  }
+
+  /**
+   * clones the schema
+   * @returns {AllOf}
+   */
+  clone () {
+    return new AllOf(this._schemas)
   }
 
   validate (v, e = {}) {

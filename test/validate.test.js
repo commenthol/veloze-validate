@@ -14,7 +14,18 @@ import {
   anyOf,
   allOf,
   not,
-  ValidationError
+  ValidationError,
+  BooleanT,
+  NumberT,
+  IntegerT,
+  DateT,
+  StringT,
+  EnumT,
+  ArrayT,
+  ObjectT,
+  OneOf,
+  AnyOf,
+  AllOf
 } from '../src/index.js'
 
 describe('validate', function () {
@@ -67,6 +78,14 @@ describe('validate', function () {
       equal(schema.validate(false, e), false)
       deepEqual(e, { message: 'boolean validate failed' })
       equal(schema.validate(true), true)
+    })
+
+    it('shall clone', function () {
+      const schema = booleanT()
+      const clone = schema.clone().cast()
+      assert.ok(clone instanceof BooleanT)
+      assert.notEqual(clone, schema)
+      assert.notEqual(clone._cast, schema._cast)
     })
   })
 
@@ -153,6 +172,14 @@ describe('validate', function () {
       equal(schema.validate(5), true)
       equal(schema.validate('5'), false)
     })
+
+    it('shall clone', function () {
+      const schema = numberT()
+      const clone = schema.clone().cast()
+      assert.ok(clone instanceof NumberT)
+      assert.notEqual(clone, schema)
+      assert.notEqual(clone._cast, schema._cast)
+    })
   })
 
   describe('integerT', function () {
@@ -193,6 +220,14 @@ describe('validate', function () {
         integerT().max(0).exclusiveMax().analyze(-0.1),
         new ValidationError({ message: 'not an integer' })
       )
+    })
+
+    it('shall clone', function () {
+      const schema = integerT()
+      const clone = schema.clone().cast()
+      assert.ok(clone instanceof IntegerT)
+      assert.notEqual(clone, schema)
+      assert.notEqual(clone._cast, schema._cast)
     })
   })
 
@@ -277,6 +312,14 @@ describe('validate', function () {
       equal(schema.validate(new Date(1e3), e), false)
       equal(e.message, 'date validate failed')
     })
+
+    it('shall clone', function () {
+      const schema = dateT()
+      const clone = schema.clone().cast()
+      assert.ok(clone instanceof DateT)
+      assert.notEqual(clone, schema)
+      assert.notEqual(clone._cast, schema._cast)
+    })
   })
 
   describe('stringT', function () {
@@ -340,6 +383,14 @@ describe('validate', function () {
       equal(schema.validate('not', e), false)
       equal(e.message, 'string validate failed')
     })
+
+    it('shall clone', function () {
+      const schema = stringT()
+      const clone = schema.clone().cast()
+      assert.ok(clone instanceof StringT)
+      assert.notEqual(clone, schema)
+      assert.notEqual(clone._cast, schema._cast)
+    })
   })
 
   describe('enumT', function () {
@@ -370,6 +421,14 @@ describe('validate', function () {
       equal(enumT([1]).validate(true), false)
       equal(enumT([1]).validate(1.23), false)
       equal(enumT([1]).validate(null), false)
+    })
+
+    it('shall clone', function () {
+      const schema = enumT([1, 2])
+      const clone = schema.clone().cast()
+      assert.ok(clone instanceof EnumT)
+      assert.notEqual(clone, schema)
+      assert.notEqual(clone._cast, schema._cast)
     })
   })
 
@@ -434,6 +493,14 @@ describe('validate', function () {
       const e = {}
       equal(schema.validate(['a', 'b', 'c'], e), false)
       equal(e.message, 'array validate failed')
+    })
+
+    it('shall clone', function () {
+      const schema = arrayT(stringT())
+      const clone = schema.clone().cast()
+      assert.ok(clone instanceof ArrayT)
+      assert.notEqual(clone, schema)
+      assert.notEqual(clone._cast, schema._cast)
     })
   })
 
@@ -679,6 +746,14 @@ describe('validate', function () {
       equal(e.message, 'object validate failed')
       equal(schema.validate({ flag: true, test: 1 }), true)
     })
+
+    it('shall clone', function () {
+      const schema = objectT(stringT())
+      const clone = schema.clone().cast()
+      assert.ok(clone instanceof ObjectT)
+      assert.notEqual(clone, schema)
+      assert.notEqual(clone._cast, schema._cast)
+    })
   })
 
   describe('oneOf', function () {
@@ -718,6 +793,13 @@ describe('validate', function () {
       equal(schema.validate({ flag: true, msg: '' }, e), false)
       deepEqual(e, { message: 'oneOf failed, matches 0 schemas' })
     })
+
+    it('shall clone', function () {
+      const schema = oneOf([numberT(), stringT()])
+      const clone = schema.clone()
+      assert.ok(clone instanceof OneOf)
+      assert.notEqual(clone, schema)
+    })
   })
 
   describe('anyOf', function () {
@@ -741,6 +823,13 @@ describe('validate', function () {
         ],
         message: 'anyOf failed'
       })
+    })
+
+    it('shall clone', function () {
+      const schema = anyOf([numberT(), stringT()])
+      const clone = schema.clone()
+      assert.ok(clone instanceof AnyOf)
+      assert.notEqual(clone, schema)
     })
   })
 
@@ -770,6 +859,13 @@ describe('validate', function () {
         ],
         message: 'allOf failed in schema[1]'
       })
+    })
+
+    it('shall clone', function () {
+      const schema = allOf([numberT(), stringT()])
+      const clone = schema.clone()
+      assert.ok(clone instanceof AllOf)
+      assert.notEqual(clone, schema)
     })
   })
   describe('not', function () {

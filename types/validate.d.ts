@@ -56,6 +56,13 @@ export class BaseT {
     _exclusiveMax: boolean | undefined;
     /** @type {any} */
     _default: any;
+    /**
+     * @protected
+     * clone schema
+     * @param {BaseT} T class
+     * @param {...any} arg arguments
+     */
+    protected _clone(T?: BaseT, ...arg: any[]): any;
     required(): this;
     cast(): this;
     default(v: any): this;
@@ -92,6 +99,11 @@ export class BooleanT extends BaseT {
     type: string;
     /** @type {((v: boolean, e?: ValidationFailure) => boolean)|undefined} */
     _validate: ((v: boolean, e?: ValidationFailure) => boolean) | undefined;
+    /**
+     * clones the schema
+     * @returns {BooleanT}
+     */
+    clone(): BooleanT;
 }
 export function booleanT(opts?: {
     required?: boolean | undefined;
@@ -103,6 +115,11 @@ export class NumberT extends BaseT {
     type: string;
     /** @type {((v: number, e?: ValidationFailure) => boolean)|undefined} */
     _validate: ((v: number, e?: ValidationFailure) => boolean) | undefined;
+    /**
+     * clones the schema
+     * @returns {NumberT}
+     */
+    clone(): NumberT;
     validate(v: any, e?: {}): boolean;
     exclusiveMin(): this;
     exclusiveMax(): this;
@@ -119,6 +136,11 @@ export function numberT(opts?: {
 export class IntegerT extends NumberT {
     _min: number;
     _max: number;
+    /**
+     * clones the schema
+     * @returns {IntegerT}
+     */
+    clone(): IntegerT;
 }
 export function integerT(opts?: {
     required?: boolean | undefined;
@@ -134,6 +156,11 @@ export class DateT extends NumberT {
     /** @type {((v: Date, e?: ValidationFailure) => boolean)|undefined} */
     _validate: ((v: Date, e?: ValidationFailure) => boolean) | undefined;
     _minMax(min: any, max: any): this;
+    /**
+     * clones the schema
+     * @returns {DateT}
+     */
+    clone(): DateT;
     /**
      * @override
      * @param {Date|number} min
@@ -163,6 +190,11 @@ export class StringT extends BaseT {
     /** @type {((v: string, e?: ValidationFailure) => boolean)|undefined} */
     _validate: ((v: string, e?: ValidationFailure) => boolean) | undefined;
     _minMax(min: any, max: any): this;
+    /**
+     * clones the schema
+     * @returns {StringT}
+     */
+    clone(): StringT;
     validate(v: any, e?: {}): boolean;
     /**
      * @param {number} min
@@ -188,6 +220,11 @@ export class EnumT extends BaseT {
     constructor(list: any, opts: any);
     type: string;
     _list: any[];
+    /**
+     * clones the schema
+     * @returns {EnumT}
+     */
+    clone(): EnumT;
     validate(v: any, e?: {}): boolean;
 }
 export function enumT(list: (string | number | boolean)[], opts?: {
@@ -201,6 +238,11 @@ export class ArrayT extends BaseT {
     /** @type {((v: any[], e?: ValidationFailure) => boolean)|undefined} */
     _validate: ((v: any[], e?: ValidationFailure) => boolean) | undefined;
     _schema: any;
+    /**
+     * clones the schema
+     * @returns {ArrayT}
+     */
+    clone(): ArrayT;
     validate(v: any, e?: {}): boolean;
 }
 export function arrayT(schema: ValidationFn, opts?: {
@@ -217,6 +259,11 @@ export class ObjectT extends BaseT {
     /** @type {boolean|undefined} */
     _additionalProperties: boolean | undefined;
     _schema: any;
+    /**
+     * clones the schema
+     * @returns {ObjectT}
+     */
+    clone(): ObjectT;
     validate(v: any, e?: {}): boolean;
     additionalProperties(): this;
 }
@@ -233,6 +280,11 @@ export class OneOf {
     constructor(schemas: any);
     type: string;
     _schemas: any[];
+    /**
+     * clones the schema
+     * @returns {OneOf}
+     */
+    clone(): OneOf;
     validate(v: any, e?: {}): boolean;
 }
 export function oneOf(schemas: BaseT[]): OneOf;
@@ -240,6 +292,11 @@ export class AnyOf {
     constructor(schemas: any);
     type: string;
     _schemas: any[];
+    /**
+     * clones the schema
+     * @returns {AnyOf}
+     */
+    clone(): AnyOf;
     validate(v: any, e?: {}): boolean;
 }
 export function anyOf(schemas: BaseT[]): AnyOf;
@@ -247,6 +304,11 @@ export class AllOf {
     constructor(schemas: any);
     type: string;
     _schemas: any[];
+    /**
+     * clones the schema
+     * @returns {AllOf}
+     */
+    clone(): AllOf;
     validate(v: any, e?: {}): boolean;
 }
 export function allOf(schemas: BaseT[]): AllOf;

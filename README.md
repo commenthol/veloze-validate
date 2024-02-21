@@ -7,7 +7,8 @@
 > A schema validator
 
 Easy type validator.  
-The validator bails out on first encountered schema violation.
+The validator bails out on first encountered schema violation.  
+Uses safe bounds for all types, e.g. string is limit to 255 or less characters.
 
 Less than 9k if minimized, less then 2.5kB if gzipped.
 
@@ -21,14 +22,15 @@ Less than 9k if minimized, less then 2.5kB if gzipped.
   * [numberT()](#numbert)
   * [integerT()](#integert)
   * [stringT()](#stringt)
+  * [stringFormatT()](#stringformatt)
   * [enumT()](#enumt)
   * [arrayT()](#arrayt)
   * [objectT()](#objectt)
   * [oneOf()](#oneof)
   * [anyOf()](#anyof)
   * [allOf()](#allof)
-  * [toJsonSchema()](#tojsonschema)
   * [cast()](#cast)
+  * [toJsonSchema()](#tojsonschema)
 * [License](#license)
 
 <!-- toc! -->
@@ -52,44 +54,38 @@ import {
   arrayT,
   objectT,
   oneOf,
-  anyOf,
-  REQUIRED, // == { required: true }
-  ADD_PROPS // == { additionalProperties: true }
+  anyOf
 } from '@veloze/validate'
 
 // alternatively
 import { type as t, oneOf, anyOf } from '@veloze/validate'
 // then use `t.boolean()` instead of `booleanT()` aso...
 
-const schema = objectT(
-  {
-    bool: booleanT(), // optional boolean
-    num: numberT({ min: -1, max: 10 }), // optional number [-1..10]
-    int: integerT().min(0).max(10), // optional integer [0,1,..10]
-    str: stringT(), // optional string
-    arr: arrayT(oneOf([stringT(), integerT()])), // optional array of string or integers
-    obj: objectT(
-      {
-        // required nested object with
-        nested: stringT() // optional string
-      },
-      REQUIRED
-    ),
-    any: anyOf([
-      // either or both
-      objectT({ flag: booleanT() }, ADD_PROPS),
-      objectT({ test: integerT() }, ADD_PROPS)
-    ])
-  }
-).required().additionalProperties()
+// required object where additionalProperties are allowed
+const schema = objectT({
+  bool: booleanT(), // optional boolean
+  num: numberT.min(-1).max(10), // optional number [-1..10]
+  int: integerT().min(0).max(10), // optional integer [0,1,..10]
+  str: stringT(), // optional string
+  arr: arrayT(oneOf([stringT(), integerT()])), // optional array of string or integers
+  obj: objectT({ // required nested object with
+    nested: stringT() // optional string
+  }).required(),
+  all: allOf([ // both must match
+    objectT({ flag: booleanT() }).additionalProperties(),
+    objectT({ test: integerT() }).additionalProperties()
+  ])
+}).required().additionalProperties()
 
 let e = {}
 let valid = schema.validate({ obj: {}, other: true }, e)
-console.log(valid, e) // true {}
+console.log(valid, e)
+// true { path: [], additionalProps: [ [ 'other' ] ] }
 
 e = {}
 valid = schema.validate({ bool: true, num: '123' }, e)
-console.log(valid, e) // false { message: 'not a number', path: [ 'num' ] }
+console.log(valid, e)
+// false { path: [ 'num' ], message: 'not a number' }
 
 e = {}
 valid = schema.validate({ arr: ['a', 1, 1.2] }, e)
@@ -97,9 +93,28 @@ console.log(valid, e)
 // false { path: [ 'arr', '2' ], message: 'oneOf failed, matches 0 schemas' }
 
 e = {}
-valid = schema.validate({ any: { flag: true, test: '1' }, obj: {} }, e)
-console.log('%s %j', valid, e)
-// false {"path":["any"],"failures":[{"path":["test"],"message":"not a number"}],"message":"anyOf failed"}
+valid = schema.validate({ all: { flag: true, test: '1' }, obj: {} }, e)
+console.log(valid, e)
+// false {"path":["all"],"message":"allOf failed in schema[1]","failures":[{"path":["all","test"],"message":"not a number"}]}
+```
+
+To validate the above schema with a custom function you can do:
+
+```js
+// optionally clone the schema
+const clone = schema.clone()
+  .custom((v, e = {}) => { // and add a custom validation function
+    if (v.bool && v.str !== 'hi') {
+      e.message = 'if bool is true then str must equal "hi"'
+      return false
+    }
+    return true
+  })
+
+// analyze() returns a ValidationError (but does not throw)
+const err = clone.analyze({ bool: true, str: 'hello', obj: {} })
+console.log(err)
+// ValidationError: if bool is true then str must equal "hi"
 ```
 
 # API
@@ -123,7 +138,7 @@ const failure = {}
 const isValid = schema.validate('str', failure)
 // isValid === false; failure == { message: 'not a number' }
 
-/* or analyze with error or null */
+/* or analyze with ValidationError (or null) */
 const err = schema.analyze('str')
 if (err) throw err
 ```
@@ -145,6 +160,7 @@ export function booleanT(
 ): {
   required(): this
   cast(): this
+  clone(): this
   custom((v: boolean, e?: ValidationFailure) => boolean): this
   validate(v: any, e?: {}): boolean
   analyze(v: any): ValidationError | null 
@@ -157,21 +173,21 @@ export function booleanT(
 // optional
 const schema = booleanT()
 schema.validate(undefined) // true
-schema.validate(true) // true
-schema.validate(false) // true
-schema.validate('true') // false
+schema.validate(true)      // true
+schema.validate(false)     // true
+schema.validate('true')    // false
 
 // type is required
 const schema = booleanT({ required: true })
 schema.validate(undefined) // false
-schema.validate(true) // true
-schema.validate(false) // true
-schema.validate('true') // false
+schema.validate(true)      // true
+schema.validate(false)     // true
+schema.validate('true')    // false
 
 // with custom validate function
 const schema = booleanT({ validate: (v) => v === false })
-schema.validate(true) // false
-schema.validate(false) // true
+schema.validate(true)      // false
+schema.validate(false)     // true
 ```
 
 ## numberT()
@@ -195,6 +211,7 @@ export function numberT(
 ): {
   required(): this
   cast(): this
+  clone(): this
   min(min: number): this
   max(max: number): this
   exclusiveMin(): this
@@ -247,6 +264,7 @@ export function integerT(
 ): {
   required(): this
   cast(): this
+  clone(): this
   min(min: number): this
   max(max: number): this
   exclusiveMin(): this
@@ -277,13 +295,6 @@ schema.validate(2) // false
 Validates if type is string.
 Defaults to minimum length 0 and maximum length 255.
 
-Validates string formats like:
-- url
-- uuid
-- date-time
-- email 
-- hostname
-
 *typedef*
 
 ```ts
@@ -300,23 +311,9 @@ export function stringT(
 ): {
   required(): this
   cast(): this
+  clone(): this
   min(min: number): this
   max(max: number): this
-  /** validate url */
-  url(): this
-  /** validate uuid; does not check on uuid version byte */
-  uuid(): this;
-  /** expects string to be a date */
-  dateTime(): this
-  /**
-   * RFC6531 or RFC5321 (ascii=true) email validation
-   * @note No support for quoted emails
-   */
-  email(options?: {ascii: boolean, minDomainSegments: number}): this;
-  /**
-   * RFC5890 or RFC1123 (ascii=true) Hostname validation
-   */
-  hostname(options?: {ascii: boolean, minDomainSegments: number}): this;
   pattern(pattern: RegExp): this
   custom((v: number, e?: ValidationFailure) => boolean): this
   validate(v: any, e?: {}): boolean
@@ -324,42 +321,116 @@ export function stringT(
 }
 ```
 
-For string format validation the following functions are provided:
-
-- _validateDateTime_: Date-time checks
-- _validateUrl_: URL checks
-- _validateUuid_: UUID checks
-
 *usage*
 
 ```js
 // optional
 const schema = stringT()
-schema.validate(undefined) // true
-schema.validate('') // true
-schema.validate('text') // true
-schema.validate(0.1) // false
+schema.validate(undefined)  // true
+schema.validate('')         // true
+schema.validate('text')     // true
+schema.validate(0.1)        // false
 
 // type is required
 const schema = stringT().required()
-schema.validate(undefined) // false
-schema.validate('') // false
-schema.validate('text') // true
+schema.validate(undefined)  // false
+schema.validate('')         // false
+schema.validate('text')     // true
 
 // pattern check
 const schema = stringT().pattern(/^ab/)
-schema.validate('abc') // true
-schema.validate('bcd') // false
+schema.validate('abc')      // true
+schema.validate('bcd')      // false
+```
 
-// string format URL check using validateUrl
-const schema = stringT().url()
-schema.validate('https://foo.bar')  // true
-schema.validate('/foo.bar')         // false
+## stringFormatT()
 
-// email validation with internationalized mails
-const schema = stringT().email().required()
-schema.validate('ɱë@ťëŝṫ.ʈḽḏ')    // true
-schema.validate('test.test.test') // false
+Formatted string type. 
+
+Validates string formats like:
+- url
+- uuid
+- date
+- date-time
+- time
+- ipv4
+- ipv6
+- email 
+- hostname
+
+```ts
+export function stringFromatT(
+  opts?:
+    | {
+        required?: boolean | undefined
+        min?: number | undefined // @default = 0
+        max?: number | undefined // @default = 255
+        pattern?: RegExp | undefined
+        validate?: ((v: string, e?: ValidationFailure) => boolean) | undefined
+      }
+    | undefined
+): {
+  required(): this
+  cast(): this
+  clone(): this
+  min(min: number): this
+  max(max: number): this
+  pattern(pattern: RegExp): this
+  custom((v: number, e?: ValidationFailure) => boolean): this
+  validate(v: any, e?: {}): boolean
+  analyze(v: any): ValidationError | null
+
+  /** validates url */
+  url(): this;
+  /** validate uuid; does not check on uuid version byte */
+  uuid(): this;
+  /** expects string to be a date */
+  dateTime(): this;
+  /** expects string to be a ISO 8601 date e.g. `2018-11-13` */
+  date(): this;
+  /**
+   * expects string to be a ISO 8601 time e.g. `20:20:39+00:00`
+   * @see https://datatracker.ietf.org/doc/html/rfc3339#section-5.6
+   */
+  time(): this;
+  /** expects string to be a IPv4 address */
+  ipv4(): this;
+  /** expects string to be a IPv6 address */
+  ipv6(): this;
+  /**
+   * RFC6531 or RFC5321 (ascii=true) email validation
+   * @note No support for quoted emails
+   */
+  email(options?: {ascii?: boolean, minDomainSegments?: number}): this;
+  /**
+   * RFC5890 or RFC1123 (ascii=true) Hostname validation
+   */
+  hostname(options?: {ascii?: boolean, minDomainSegments?: number}): this;
+}
+```
+
+Examples:
+
+```js
+import { stringFormatT } from '@veloze/validate'
+
+stringFormatT().url().validate('https://foo.bar/path?a=1?b=2')
+
+stringFormatT().uuid().validate('641663d3-4689-4ab0-842d-11fe8bfcfb17')
+
+stringFormatT().dateTime().validate('2020-12-01T12:01:02Z')
+
+stringFormatT().date().validate('2020-12-01')
+
+stringFormatT().time().validate('16:39:57-08:00')
+
+stringFormatT().ipv4().validate('255.1.1.0')
+
+stringFormatT().ipv6().validate('fe80::7:8')
+
+stringFormatT().email().validate('ɱë@ťëŝṫ.ʈḽḏ')
+
+stringFormatT().hostname().validate('test.tld')
 ```
 
 ## enumT()
@@ -377,6 +448,7 @@ export function enumT(
       }
     | undefined
 ): {
+  clone(): this
   required(): this
   validate(v: any, e?: {}): boolean
   analyze(v: any): ValidationError | null
@@ -418,6 +490,7 @@ export function arrayT(
     | undefined
 ): {
   required(): this
+  clone(): this
   min(min: number): this
   max(max: number): this
   custom((v: any[], e?: ValidationFailure) => boolean): this
@@ -462,6 +535,7 @@ export function objectT(
     | undefined
 ): {
   required(): this
+  clone(): this
   min(min: number): this
   max(max: number): this
   additionalProperties(): this
@@ -503,7 +577,9 @@ Data must be valid against exactly one of the given schemas.
 
 ```ts
 export function oneOf(schemas: BaseT[]): {
+  clone(): this
   validate(v: any, e?: {}): boolean;
+  analyze(v: any): ValidationError | null
 }
 ```
 
@@ -522,6 +598,7 @@ Data must be valid against any (one or more) of the given schemas
 
 ```ts
 export function anyOf(schemas: BaseT[]): {
+  clone(): this
   validate(v: any, e?: {}): boolean
   analyze(v: any): ValidationError | null
 }
@@ -553,7 +630,8 @@ Data must be valid against all of the given schemas
 
 ```ts
 export function allOf(schemas: BaseT[]): {
-  validate(v: any, e?: {}): boolean
+  clone(): this
+  validate(v: any, e?: {}): boolean;
   analyze(v: any): ValidationError | null
 }
 ```
@@ -574,6 +652,70 @@ schema.validate({ num: 0 }) // true
 let failure = {}
 schema.validate({ str: 'aaa', num: -1 }, failure)
 // false {"message":"allOf failed in schema[1]","failures":[{"path":["num"],"message":"number less than min=0"}]}
+```
+
+## cast()
+
+Casts or coerces validated values from schema and applies default values.
+
+*usage*
+
+```js
+import { booleanT, numberT, oneOf, cast } from '@veloze/validate'
+
+const schema = oneOf([
+  booleanT({ cast: true }),
+  numberT({ cast: true })
+])
+const castValues = cast(schema)
+
+const v = 'false'
+// first validate...
+const isValid = schema.validate(v)
+// ... if `true` then cast
+if (isValid) {
+  const value = castValues(v)
+  console.log(value)
+  // value === false
+}
+```
+
+Use with own coerce function
+
+*usage*
+
+```js
+class RegExpT extends StringT {
+  coerce (v) { // called by cast()
+    return new RegExp(v)
+  }
+}
+
+const schema = new RegExpT().cast()
+const v = '^hi'
+const isValid = schema.validate(v)
+if (isValid) {
+  const value = castValues(v)
+  // value === /^hi/
+}
+```
+
+Set default when value is undefined:
+
+```js
+// default to a static value
+const schema = stringT().default('4h8pxby0w77')
+const castValue = cast(schema)
+console.log(schema.validate(), castValue())
+// true 4h8pxby0w77
+```
+
+```js
+// default to a dynamic value
+const schema = stringT().default(() => Math.random().toString(36).slice(2))
+const castValue = cast(schema)
+console.log(schema.validate(), castValue())
+// true la7rqqds4o
 ```
 
 ## toJsonSchema()
@@ -612,52 +754,6 @@ toJsonSchema(object)
 //   ]
 // }
 ```
-
-## cast()
-
-Casts validated values from schema.
-
-*usage*
-
-```js
-import { booleanT, numberT, cast } from '@veloze/validate'
-
-const schema = oneOf([
-  booleanT({ cast: true }), 
-  numberT({ cast: true })
-])
-const castValues = cast(schema)
-
-const v = 'false'
-// first validate...
-const isValid = schema.validate(v)
-// ... if `true` then cast
-if (isValid) {
-  const value = castValues(v)
-  // value === false
-}
-```
-
-Use with own coerce function
-
-*usage*
-
-```js 
-class RegExpT extends StringT {
-  coerce (v) { // called by cast()
-    return new RegExp(v)
-  }
-}
-
-const schema = new RegExpT().cast()
-const v = '^hi'
-const isValid = schema.validate(v)
-if (isValid) {
-  const value = castValues(v)
-  // value === /^hi/
-}
-```
-
 
 # License
 

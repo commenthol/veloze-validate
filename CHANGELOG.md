@@ -1,3 +1,18 @@
+# 0.8.0 (2024-02-21)
+
+### feat:
+
+- clone schema (#b4aeab2)
+
+### fix:
+
+- console.log in code; bound ipv6 regex (#e22858b)
+- linter no-console warn (#aa13969)
+
+### docs:
+
+- update description and examples (#2bb0d9b)
+
 # 0.7.0 (2024-02-20)
 
 ### BREAKING CHANGE:

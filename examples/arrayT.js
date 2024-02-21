@@ -1,3 +1,4 @@
+/* eslint no-console: off */
 import { numberT, arrayT, REQUIRED } from '../src/index.js'
 
 const subschema = numberT({ min: 0, max: 100, exclusiveMax: true })

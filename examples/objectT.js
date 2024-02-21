@@ -1,4 +1,11 @@
-import { numberT, stringT, objectT, REQUIRED, ADD_PROPS } from '../src/index.js'
+/* eslint no-console: off */
+import {
+  numberT,
+  stringT,
+  objectT,
+  REQUIRED,
+  ADD_PROPS
+} from '../src/index.js'
 
 const subschema = {
   num: numberT({ min: 0, max: 100, exclusiveMax: true }),

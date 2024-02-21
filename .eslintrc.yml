@@ -12,3 +12,5 @@ rules:
     - error
     - varsIgnorePattern: "^_$"
       argsIgnorePattern: "^_"
+  no-console:
+    - warn

@@ -36,6 +36,11 @@ describe('cast', function () {
       const schema = booleanT().default(true)
       equal(cast(schema)(), true)
     })
+
+    it('shall ignore undefined default', function () {
+      const schema = booleanT().cast().default(true)
+      equal(cast(schema)('true'), true)
+    })
   })
 
   describe('number', function () {
@@ -84,7 +89,7 @@ describe('cast', function () {
   })
 
   describe('string', function () {
-    it('shall cast stringDateTimeT', function () {
+    it('shall cast stringT().dateTime()', function () {
       const schema = stringT().cast().dateTime()
       deepEqual(
         cast(schema)('1900-01-01T00:00:00Z'),
@@ -92,9 +97,14 @@ describe('cast', function () {
       )
     })
 
-    it('shall not cast stringDateTimeT', function () {
+    it('shall not cast stringT().dateTime()', function () {
       const schema = stringT().dateTime()
       equal(cast(schema)('1900-01-01T00:00:00Z'), '1900-01-01T00:00:00Z')
+    })
+
+    it('shall cast stringT().regex()', function () {
+      const schema = stringT().cast().regex()
+      deepEqual(cast(schema)('closed (?:group)'), /closed (?:group)/)
     })
 
     it('shall not cast stringT', function () {

@@ -179,6 +179,15 @@ describe('stringFormatT', function () {
     })
   })
 
+  describe('regex validation', function () {
+    it('shall validate', function () {
+      equal(stringFormatT().regex().validate('closed (?:group)'), true)
+      const e = {}
+      equal(stringFormatT().regex().validate('unclosed (?:group', e), false)
+      deepEqual(e, { message: 'string is not a regex' })
+    })
+  })
+
   describe('email validation', function () {
     emailFixtures.forEach(({ test, mail, err, opts, only }) => {
       const fn = only ? it.only : it

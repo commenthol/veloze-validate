@@ -32,6 +32,11 @@ export class StringFormatT extends StringT {
      */
     time(): this;
     /**
+     * expects string to be a valid ECMA-262 regex
+     * @returns {this}
+     */
+    regex(): this;
+    /**
      * expects string to be a IPv4 address
      * @returns {this}
      */
@@ -67,6 +72,7 @@ export function validateUuid(string: string, e?: import("./validate.js").Validat
 export function validateDateTime(string: string, e?: import("./validate.js").ValidationFailure | undefined): boolean;
 export function validateDate(string: string, e?: import("./validate.js").ValidationFailure | undefined): boolean;
 export function validateTime(string: string, e?: import("./validate.js").ValidationFailure | undefined): boolean;
+export function validateRegex(string: string, e?: import("./validate.js").ValidationFailure | undefined): boolean;
 export function validateIPv4(string: string, e?: import("./validate.js").ValidationFailure | undefined): boolean;
 export function validateIPv6(string: string, e?: import("./validate.js").ValidationFailure | undefined): boolean;
 export function validateEmail(options?: EmailDomainValidationOptions | undefined): ValidationFn;

@@ -44,7 +44,6 @@ export const ADD_PROPS = Object.freeze({ additionalProperties: true })
  */
 function addOpts (that, opts) {
   for (const key of Object.keys(opts || {})) {
-    if (['minMax'].includes(key)) continue
     // @ts-expect-error
     that[`_${key}`] = opts[key]
   }
@@ -57,8 +56,8 @@ export class ValidationError extends Error {
   constructor (e) {
     const message = e?.message || 'validation failed'
     super(message)
-    this.path = e.path
-    this.failures = e.failures
+    this.path = e?.path
+    this.failures = e?.failures
   }
 }
 

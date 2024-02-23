@@ -1,16 +1,43 @@
-import { validateDateTime } from './stringFormat.js'
-
+/** @typedef {import('./validate.js').BaseT} BaseT */
 /** @typedef {import('./validate.js').ValidationFn} ValidationFn */
 
+/**
+ * @param {string|boolean} v
+ * @returns {boolean}
+ */
+// @ts-expect-error
 const booleanCoerce = (v) => (v === 'true' || v === 'false' ? v === 'true' : v)
 
+/**
+ * @param {string|number} v
+ * @returns {number}
+ */
 const numberCoerce = (v) =>
+  // @ts-expect-error
   typeof v === 'string' && !isNaN(Number(v)) ? Number(v) : v
 
+/**
+ * @param {any} v
+ * @returns {any}
+ */
 const noCoerce = (v) => v
 
+/**
+ * @param {string} v
+ * @returns {Date}
+ */
 const stringDateTimeCoerce = (v) => new Date(v)
 
+/**
+ * @param {string} v
+ * @returns {RegExp}
+ */
+const stringRegexCoerce = (v) => new RegExp(v)
+
+/**
+ * @param {BaseT} schema
+ * @returns {(v: any[]) => any[]}
+ */
 const arrayCoerce = (schema) => (v) =>
   Array.isArray(v) ? v.map(cast(schema)) : v
 
@@ -29,6 +56,10 @@ const objectCoerce = (schema) => (v) => {
   return obj
 }
 
+/**
+ * @param {BaseT[]} schemas
+ * @returns {any}
+ */
 const oneOrAnyOfCoerce = (schemas) => (v) => {
   // obtain first applicable schema
   for (const schema of schemas) {
@@ -45,30 +76,40 @@ const oneOrAnyOfCoerce = (schemas) => (v) => {
  * @returns {(any) => any}
  */
 export function cast (schema) {
-  const { type, format, coerce, _cast, _validate, _default } = schema
+  const { type, format, coerce, _cast, _default } = schema
 
   if (_cast && typeof coerce === 'function') {
     return (v) => schema.coerce(v)
   }
 
-  let fn
+  let fn = noCoerce
   switch (type) {
     case 'boolean':
-      fn = _cast ? booleanCoerce : noCoerce
+      if (_cast) {
+        fn = booleanCoerce
+      }
       break
     case 'integer':
     case 'number':
-      fn = _cast ? numberCoerce : noCoerce
+      if (_cast) {
+        fn = numberCoerce
+      }
       break
-    case 'string':
-      fn =
-        _cast && (_validate === validateDateTime || format === 'date-time')
-          ? stringDateTimeCoerce
-          : noCoerce
+    case 'string': {
+      if (_cast) {
+        switch (format) {
+          case 'date-time':
+            fn = stringDateTimeCoerce
+            break
+          case 'regex':
+            fn = stringRegexCoerce
+            break
+        }
+      }
       break
+    }
     case 'date':
     case 'enum':
-      fn = noCoerce
       break
     case 'array':
       fn = arrayCoerce(schema._schema)
@@ -84,6 +125,7 @@ export function cast (schema) {
     default:
       throw new TypeError(`unknown schema type=${type}`)
   }
+
   return _default === undefined
     ? fn
     : (v) =>

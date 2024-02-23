@@ -99,6 +99,12 @@ describe('jsonSchema', function () {
       maxLength: 255,
       default: 'hello'
     })
+    deepEqual(toJsonSchema(stringFormatT().regex().min(10).max(20)), {
+      type: 'string',
+      format: 'regex',
+      minLength: 10,
+      maxLength: 20
+    })
   })
 
   it('convert string formats', function () {

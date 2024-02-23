@@ -875,4 +875,17 @@ describe('validate', function () {
       })
     })
   })
+
+  describe('ValidationError', function () {
+    it('shall set message', function () {
+      const err = new ValidationError()
+      equal(err.message, 'validation failed')
+    })
+
+    it('shall set message and path', function () {
+      const err = new ValidationError({ message: 'not a string', path: '/' })
+      equal(err.message, 'not a string')
+      equal(err.path, '/')
+    })
+  })
 })

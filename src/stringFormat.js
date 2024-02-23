@@ -62,6 +62,16 @@ export class StringFormatT extends StringT {
   }
 
   /**
+   * expects string to be a valid ECMA-262 regex
+   * @returns {this}
+   */
+  regex () {
+    this._validate = validateRegex
+    this.format = 'regex'
+    return this
+  }
+
+  /**
    * expects string to be a IPv4 address
    * @returns {this}
    */
@@ -195,6 +205,22 @@ export const validateTime = (string, e = {}) => {
     return false
   }
   return true
+}
+
+/**
+ * @param {string} string
+ * @param {ValidationFailure} [e]
+ * @returns {boolean}
+ */
+export const validateRegex = (string, e = {}) => {
+  try {
+    // eslint-disable-next-line no-new
+    new RegExp(string)
+    return true
+  } catch (err) {
+    e.message = 'string is not a regex'
+  }
+  return false
 }
 
 // @credits https://gist.github.com/syzdek/6086792

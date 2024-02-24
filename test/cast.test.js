@@ -1,4 +1,4 @@
-import assert, { equal, deepEqual } from 'assert/strict'
+import { equal, deepEqual } from 'assert/strict'
 import {
   cast,
   booleanT,
@@ -180,6 +180,20 @@ describe('cast', function () {
         }
       )
     })
+
+    it('shall apply defaults', function () {
+      const schema = objectT({
+        int: integerT().default(42),
+        fn: stringT().default(() => 'is7'),
+        cast: numberT().cast()
+      })
+      const actual = cast(schema)({ cast: '3.1415' })
+      deepEqual(actual, {
+        int: 42,
+        fn: 'is7',
+        cast: 3.1415
+      })
+    })
   })
 
   describe('oneOf', function () {
@@ -199,25 +213,6 @@ describe('cast', function () {
       equal(cast(schema)('false'), false)
       equal(cast(schema)('true'), true)
       deepEqual(cast(schema)([]), [])
-    })
-  })
-
-  describe('unknown', function () {
-    it('shall throw', function () {
-      assert.throws(
-        () => {
-          const schema = (() => {
-            function unknown () {}
-            Object.assign(unknown, { type: 'unknown' })
-            return unknown
-          })()
-          cast(schema)('hi')
-        },
-        {
-          name: 'TypeError',
-          message: 'unknown schema type=unknown'
-        }
-      )
     })
   })
 

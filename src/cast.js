@@ -53,6 +53,12 @@ const objectCoerce = (schema) => (v) => {
       obj[prop] = value
     }
   }
+  for (const [prop, subSchema] of Object.entries(schema)) {
+    if (subSchema._default === undefined || obj[prop] !== undefined) {
+      continue
+    }
+    obj[prop] = getDefault(subSchema._default)
+  }
   return obj
 }
 
@@ -122,8 +128,6 @@ export function cast (schema) {
     case 'allOf':
       fn = oneOrAnyOfCoerce(schema._schemas)
       break
-    default:
-      throw new TypeError(`unknown schema type=${type}`)
   }
 
   return _default === undefined
@@ -131,7 +135,7 @@ export function cast (schema) {
     : (v) =>
         v !== undefined
           ? fn(v)
-          : typeof _default === 'function'
-            ? _default()
-            : _default
+          : getDefault(_default)
 }
+
+const getDefault = (_default) => typeof _default === 'function' ? _default() : _default

@@ -13,6 +13,7 @@ export function not(): void;
  * }} ValidationFailure
  */
 /** @typedef {(v: any, e?: ValidationFailure) => boolean} ValidationFn */
+/** @typedef {BaseT|BooleanT|NumberT|IntegerT|DateT|StringT|EnumT|ArrayT|ObjectT|OneOf|AnyOf|AllOf} Schema */
 /**
  * shortcut for { required: true }
  * @example
@@ -95,7 +96,18 @@ export class BaseT {
     analyze(v: any): ValidationError | null;
 }
 export class BooleanT extends BaseT {
-    constructor(opts: any);
+    /**
+     * @param {{
+     *  required?: boolean
+     *  cast?: boolean
+     *  validate?: (v: number, e?: ValidationFailure) => boolean
+     * }} [opts]
+     */
+    constructor(opts?: {
+        required?: boolean | undefined;
+        cast?: boolean | undefined;
+        validate?: ((v: number, e?: ValidationFailure) => boolean) | undefined;
+    } | undefined);
     type: string;
     /** @type {((v: boolean, e?: ValidationFailure) => boolean)|undefined} */
     _validate: ((v: boolean, e?: ValidationFailure) => boolean) | undefined;
@@ -111,7 +123,26 @@ export function booleanT(opts?: {
     validate?: ((v: number, e?: ValidationFailure) => boolean) | undefined;
 } | undefined): BooleanT;
 export class NumberT extends BaseT {
-    constructor(opts: any);
+    /**
+     * @param {{
+     *  required?: boolean
+     *  cast?: boolean
+     *  min?: number
+     *  max?: number
+     *  exclusiveMin?: boolean
+     *  exclusiveMax?: boolean
+     *  validate?: (v: number, e?: ValidationFailure) => boolean
+     * }} [opts]
+     */
+    constructor(opts?: {
+        required?: boolean | undefined;
+        cast?: boolean | undefined;
+        min?: number | undefined;
+        max?: number | undefined;
+        exclusiveMin?: boolean | undefined;
+        exclusiveMax?: boolean | undefined;
+        validate?: ((v: number, e?: ValidationFailure) => boolean) | undefined;
+    } | undefined);
     type: string;
     /** @type {((v: number, e?: ValidationFailure) => boolean)|undefined} */
     _validate: ((v: number, e?: ValidationFailure) => boolean) | undefined;
@@ -153,6 +184,24 @@ export function integerT(opts?: {
 } | undefined): IntegerT;
 export function toDate(v: any): Date | undefined;
 export class DateT extends NumberT {
+    /**
+     * @param {{
+     *  required?: boolean
+     *  min?: Date | number | string
+     *  max?: Date | number | string
+     *  exclusiveMin?: boolean
+     *  exclusiveMax?: boolean
+     *  validate?: (v: Date, e?: ValidationFailure) => boolean
+     * }} [opts]
+     */
+    constructor(opts?: {
+        required?: boolean | undefined;
+        min?: string | number | Date | undefined;
+        max?: string | number | Date | undefined;
+        exclusiveMin?: boolean | undefined;
+        exclusiveMax?: boolean | undefined;
+        validate?: ((v: Date, e?: ValidationFailure) => boolean) | undefined;
+    } | undefined);
     /** @type {((v: Date, e?: ValidationFailure) => boolean)|undefined} */
     _validate: ((v: Date, e?: ValidationFailure) => boolean) | undefined;
     _minMax(min: any, max: any): this;
@@ -181,7 +230,22 @@ export function dateT(opts?: {
     validate?: ((v: Date, e?: ValidationFailure) => boolean) | undefined;
 } | undefined): DateT;
 export class StringT extends BaseT {
-    constructor(opts: any);
+    /**
+     * @param {{
+     *  required?: boolean
+     *  min?: number
+     *  max?: number
+     *  pattern?: RegExp
+     *  validate?: (v: string, e?: ValidationFailure) => boolean
+     * }} [opts]
+     */
+    constructor(opts?: {
+        required?: boolean | undefined;
+        min?: number | undefined;
+        max?: number | undefined;
+        pattern?: RegExp | undefined;
+        validate?: ((v: string, e?: ValidationFailure) => boolean) | undefined;
+    } | undefined);
     type: string;
     _min: number;
     _max: number;
@@ -217,9 +281,17 @@ export function stringT(opts?: {
     validate?: ((v: string, e?: ValidationFailure) => boolean) | undefined;
 } | undefined): StringT;
 export class EnumT extends BaseT {
-    constructor(list: any, opts: any);
+    /**
+     * @param {(string|number|boolean)[]} list
+     * @param {{
+     *  required?: boolean
+     * }} [opts ]
+     */
+    constructor(list: (string | number | boolean)[], opts?: {
+        required?: boolean | undefined;
+    } | undefined);
     type: string;
-    _list: any[];
+    _list: (string | number | boolean)[];
     /**
      * clones the schema
      * @returns {EnumT}
@@ -231,13 +303,27 @@ export function enumT(list: (string | number | boolean)[], opts?: {
     required?: boolean | undefined;
 } | undefined): EnumT;
 export class ArrayT extends BaseT {
-    constructor(schema: any, opts: any);
+    /**
+     * @param {Schema} schema
+     * @param {{
+     *  required?: boolean
+     *  min?: number
+     *  max?: number
+     *  validate?: (v: any[], e: ValidationFailure) => boolean
+     * }} [opts]
+     */
+    constructor(schema: Schema, opts?: {
+        required?: boolean | undefined;
+        min?: number | undefined;
+        max?: number | undefined;
+        validate?: ((v: any[], e: ValidationFailure) => boolean) | undefined;
+    } | undefined);
     type: string;
     _min: number;
     _max: number;
     /** @type {((v: any[], e?: ValidationFailure) => boolean)|undefined} */
     _validate: ((v: any[], e?: ValidationFailure) => boolean) | undefined;
-    _schema: any;
+    _schema: Schema;
     /**
      * clones the schema
      * @returns {ArrayT}
@@ -245,20 +331,40 @@ export class ArrayT extends BaseT {
     clone(): ArrayT;
     validate(v: any, e?: {}): boolean;
 }
-export function arrayT(schema: ValidationFn, opts?: {
+export function arrayT(schema: Schema, opts?: {
     required?: boolean | undefined;
     min?: number | undefined;
     max?: number | undefined;
     validate?: ((v: any[], e: ValidationFailure) => boolean) | undefined;
 } | undefined): ArrayT;
 export class ObjectT extends BaseT {
-    constructor(schema: any, opts: any);
+    /**
+     * @param {{[key: string]: Schema}} schema
+     * @param {{
+     *  required?: boolean
+     *  min?: number
+     *  max?: number
+     *  additionalProperties?: boolean
+     *  validate?: (v: object, e?: ValidationFailure) => boolean
+     * }} [opts]
+     */
+    constructor(schema: {
+        [key: string]: Schema;
+    }, opts?: {
+        required?: boolean | undefined;
+        min?: number | undefined;
+        max?: number | undefined;
+        additionalProperties?: boolean | undefined;
+        validate?: ((v: object, e?: ValidationFailure) => boolean) | undefined;
+    } | undefined);
     type: string;
     _min: number;
     _max: number;
     /** @type {boolean|undefined} */
     _additionalProperties: boolean | undefined;
-    _schema: any;
+    _schema: {
+        [key: string]: Schema;
+    };
     /**
      * clones the schema
      * @returns {ObjectT}
@@ -268,7 +374,7 @@ export class ObjectT extends BaseT {
     additionalProperties(): this;
 }
 export function objectT(schema: {
-    [key: string]: BaseT;
+    [key: string]: Schema;
 }, opts?: {
     required?: boolean | undefined;
     min?: number | undefined;
@@ -277,9 +383,13 @@ export function objectT(schema: {
     validate?: ((v: object, e?: ValidationFailure) => boolean) | undefined;
 } | undefined): ObjectT;
 export class OneOf {
-    constructor(schemas: any);
+    /**
+     * Data must be valid against exactly one of the given schemas.
+     * @param {Schema[]} schemas
+     */
+    constructor(schemas: Schema[]);
     type: string;
-    _schemas: any[];
+    _schemas: Schema[];
     /**
      * clones the schema
      * @returns {OneOf}
@@ -287,11 +397,15 @@ export class OneOf {
     clone(): OneOf;
     validate(v: any, e?: {}): boolean;
 }
-export function oneOf(schemas: BaseT[]): OneOf;
+export function oneOf(schemas: Schema[]): OneOf;
 export class AnyOf {
-    constructor(schemas: any);
+    /**
+     * Data must be valid against any (one or more) of the given schemas
+     * @param {Schema[]} schemas
+     */
+    constructor(schemas: Schema[]);
     type: string;
-    _schemas: any[];
+    _schemas: Schema[];
     /**
      * clones the schema
      * @returns {AnyOf}
@@ -299,11 +413,15 @@ export class AnyOf {
     clone(): AnyOf;
     validate(v: any, e?: {}): boolean;
 }
-export function anyOf(schemas: BaseT[]): AnyOf;
+export function anyOf(schemas: Schema[]): AnyOf;
 export class AllOf {
-    constructor(schemas: any);
+    /**
+     * Data must be valid against all of the given schemas
+     * @param {Schema[]} schemas
+     */
+    constructor(schemas: Schema[]);
     type: string;
-    _schemas: any[];
+    _schemas: Schema[];
     /**
      * clones the schema
      * @returns {AllOf}
@@ -311,7 +429,7 @@ export class AllOf {
     clone(): AllOf;
     validate(v: any, e?: {}): boolean;
 }
-export function allOf(schemas: BaseT[]): AllOf;
+export function allOf(schemas: Schema[]): AllOf;
 export namespace type {
     export { booleanT as boolean };
     export { numberT as number };
@@ -325,7 +443,7 @@ export namespace type {
 export type Options = {
     required?: boolean | undefined;
     cast?: boolean | undefined;
-    validate?: ((v: number, e?: ValidationFailure) => boolean) | undefined;
+    validate?: ((v: any, e?: ValidationFailure) => boolean) | undefined;
     min?: number | undefined;
     max?: number | undefined;
     exclusiveMin?: boolean | undefined;
@@ -338,3 +456,4 @@ export type ValidationFailure = {
     additionalProps?: string[][];
 };
 export type ValidationFn = (v: any, e?: ValidationFailure) => boolean;
+export type Schema = BaseT | BooleanT | NumberT | IntegerT | DateT | StringT | EnumT | ArrayT | ObjectT | OneOf | AnyOf | AllOf;

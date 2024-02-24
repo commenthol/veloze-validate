@@ -7,6 +7,7 @@
  * }} ValidationFailure
  */
 /** @typedef {(v: any, e?: ValidationFailure) => boolean} ValidationFn */
+/** @typedef {BaseT|BooleanT|NumberT|IntegerT|DateT|StringT|EnumT|ArrayT|ObjectT|OneOf|AnyOf|AllOf} Schema */
 
 /**
  * shortcut for { required: true }
@@ -30,7 +31,7 @@ export const ADD_PROPS = Object.freeze({ additionalProperties: true })
  * @typedef {{
  *  required?: boolean
  *  cast?: boolean
- *  validate?: (v: number, e?: ValidationFailure) => boolean
+ *  validate?: (v: any, e?: ValidationFailure) => boolean
  *  min?: number
  *  max?: number
  *  exclusiveMin?: boolean
@@ -172,6 +173,13 @@ export class BooleanT extends BaseT {
   // @ts-expect-error
   _validate
 
+  /**
+   * @param {{
+   *  required?: boolean
+   *  cast?: boolean
+   *  validate?: (v: number, e?: ValidationFailure) => boolean
+   * }} [opts]
+   */
   constructor (opts) {
     super()
     addOpts(this, opts)
@@ -226,6 +234,17 @@ export class NumberT extends BaseT {
   // @ts-expect-error
   _validate
 
+  /**
+   * @param {{
+   *  required?: boolean
+   *  cast?: boolean
+   *  min?: number
+   *  max?: number
+   *  exclusiveMin?: boolean
+   *  exclusiveMax?: boolean
+   *  validate?: (v: number, e?: ValidationFailure) => boolean
+   * }} [opts]
+   */
   constructor (opts) {
     super()
     addOpts(this, opts)
@@ -311,6 +330,17 @@ export class IntegerT extends NumberT {
   _min = Number.MIN_SAFE_INTEGER
   _max = Number.MAX_SAFE_INTEGER
 
+  /**
+   * @param {{
+   *  required?: boolean
+   *  cast?: boolean
+   *  min?: number
+   *  max?: number
+   *  exclusiveMin?: boolean
+   *  exclusiveMax?: boolean
+   *  validate?: (v: number, e?: ValidationFailure) => boolean
+   * }} [opts]
+   */
   constructor (opts) {
     super()
     addOpts(this, opts)
@@ -366,8 +396,19 @@ export class DateT extends NumberT {
   // @ts-expect-error
   _validate
 
+  /**
+   * @param {{
+   *  required?: boolean
+   *  min?: Date | number | string
+   *  max?: Date | number | string
+   *  exclusiveMin?: boolean
+   *  exclusiveMax?: boolean
+   *  validate?: (v: Date, e?: ValidationFailure) => boolean
+   * }} [opts]
+   */
   constructor (opts) {
     super()
+    // @ts-expect-error
     addOpts(this, opts)
     this._minMax()
   }
@@ -483,6 +524,15 @@ export class StringT extends BaseT {
   /** @type {((v: string, e?: ValidationFailure) => boolean)|undefined} */
   _validate = undefined
 
+  /**
+   * @param {{
+   *  required?: boolean
+   *  min?: number
+   *  max?: number
+   *  pattern?: RegExp
+   *  validate?: (v: string, e?: ValidationFailure) => boolean
+   * }} [opts]
+   */
   constructor (opts) {
     super()
     addOpts(this, opts)
@@ -581,6 +631,12 @@ export const stringT = (opts) => new StringT(opts)
 export class EnumT extends BaseT {
   type = 'enum'
 
+  /**
+   * @param {(string|number|boolean)[]} list
+   * @param {{
+   *  required?: boolean
+   * }} [opts ]
+   */
   constructor (list, opts) {
     super()
     addOpts(this, opts)
@@ -628,8 +684,18 @@ export class ArrayT extends BaseT {
   /** @type {((v: any[], e?: ValidationFailure) => boolean)|undefined} */
   _validate = undefined
 
+  /**
+   * @param {Schema} schema
+   * @param {{
+   *  required?: boolean
+   *  min?: number
+   *  max?: number
+   *  validate?: (v: any[], e: ValidationFailure) => boolean
+   * }} [opts]
+   */
   constructor (schema, opts) {
     super()
+    // @ts-expect-error
     addOpts(this, opts)
 
     const { _min, _max } = this
@@ -657,7 +723,7 @@ export class ArrayT extends BaseT {
       return true
     }
     if (!Array.isArray(v)) {
-      e.message = 'no an array'
+      e.message = 'not an array'
       return false
     }
     if (v.length < _min) {
@@ -685,7 +751,7 @@ export class ArrayT extends BaseT {
 }
 
 /**
- * @param {ValidationFn} schema
+ * @param {Schema} schema
  * @param {{
  *  required?: boolean
  *  min?: number
@@ -705,6 +771,16 @@ export class ObjectT extends BaseT {
   // @ts-expect-error
   _validate
 
+  /**
+   * @param {{[key: string]: Schema}} schema
+   * @param {{
+   *  required?: boolean
+   *  min?: number
+   *  max?: number
+   *  additionalProperties?: boolean
+   *  validate?: (v: object, e?: ValidationFailure) => boolean
+   * }} [opts]
+   */
   constructor (schema, opts) {
     super()
     addOpts(this, opts)
@@ -789,7 +865,7 @@ export class ObjectT extends BaseT {
 }
 
 /**
- * @param {{[key: string]: BaseT}} schema
+ * @param {{[key: string]: Schema}} schema
  * @param {{
  *  required?: boolean
  *  min?: number
@@ -803,6 +879,10 @@ export const objectT = (schema, opts) => new ObjectT(schema, opts)
 export class OneOf {
   type = 'oneOf'
 
+  /**
+   * Data must be valid against exactly one of the given schemas.
+   * @param {Schema[]} schemas
+   */
   constructor (schemas) {
     if (!Array.isArray(schemas)) {
       throw TypeError('schema array expected')
@@ -835,12 +915,17 @@ export class OneOf {
 
 /**
  * Data must be valid against exactly one of the given schemas.
- * @param {BaseT[]} schemas
+ * @param {Schema[]} schemas
  */
 export const oneOf = (schemas) => new OneOf(schemas)
 
 export class AnyOf {
   type = 'anyOf'
+
+  /**
+   * Data must be valid against any (one or more) of the given schemas
+   * @param {Schema[]} schemas
+   */
   constructor (schemas) {
     if (!Array.isArray(schemas)) {
       throw TypeError('schema array expected')
@@ -874,12 +959,17 @@ export class AnyOf {
 
 /**
  * Data must be valid against any (one or more) of the given schemas
- * @param {BaseT[]} schemas
+ * @param {Schema[]} schemas
  */
 export const anyOf = (schemas) => new AnyOf(schemas)
 
 export class AllOf {
   type = 'allOf'
+
+  /**
+   * Data must be valid against all of the given schemas
+   * @param {Schema[]} schemas
+   */
   constructor (schemas) {
     if (!Array.isArray(schemas)) {
       throw TypeError('schema array expected')
@@ -913,7 +1003,7 @@ export class AllOf {
 
 /**
  * Data must be valid against all of the given schemas
- * @param {BaseT[]} schemas
+ * @param {Schema[]} schemas
  */
 export const allOf = (schemas) => new AllOf(schemas)
 

@@ -190,7 +190,7 @@ export class DateT extends NumberT {
      *  max?: Date | number | string
      *  exclusiveMin?: boolean
      *  exclusiveMax?: boolean
-     *  validate?: (v: Date, e?: ValidationFailure) => boolean
+     *  validate?: (v: Date|number, e?: ValidationFailure) => boolean
      * }} [opts]
      */
     constructor(opts?: {
@@ -199,10 +199,10 @@ export class DateT extends NumberT {
         max?: string | number | Date | undefined;
         exclusiveMin?: boolean | undefined;
         exclusiveMax?: boolean | undefined;
-        validate?: ((v: Date, e?: ValidationFailure) => boolean) | undefined;
+        validate?: ((v: Date | number, e?: ValidationFailure) => boolean) | undefined;
     } | undefined);
-    /** @type {((v: Date, e?: ValidationFailure) => boolean)|undefined} */
-    _validate: ((v: Date, e?: ValidationFailure) => boolean) | undefined;
+    /** @type {((v: Date|number, e?: ValidationFailure) => boolean)|undefined} */
+    _validate: ((v: Date | number, e?: ValidationFailure) => boolean) | undefined;
     _minMax(min: any, max: any): this;
     /**
      * clones the schema
@@ -226,7 +226,7 @@ export function dateT(opts?: {
     max?: string | number | Date | undefined;
     exclusiveMin?: boolean | undefined;
     exclusiveMax?: boolean | undefined;
-    validate?: ((v: Date, e?: ValidationFailure) => boolean) | undefined;
+    validate?: ((v: Date | number, e?: ValidationFailure) => boolean) | undefined;
 } | undefined): DateT;
 export class StringT extends BaseT {
     /**
@@ -377,6 +377,16 @@ export function objectT(schema: {
     additionalProperties?: boolean | undefined;
     validate?: ((v: object, e?: ValidationFailure) => boolean) | undefined;
 } | undefined): ObjectT;
+export class InstanceT extends BaseT {
+    constructor(instance: any, opts: any);
+    _instance: any;
+    clone(): any;
+    validate(v: any, e?: {}): boolean;
+}
+export function instanceT(instance: InstanceType<any>, opts?: {
+    required?: boolean | undefined;
+    validate?: ((v: object, e?: ValidationFailure) => boolean) | undefined;
+} | undefined): InstanceT;
 export class OneOf extends BaseT {
     /**
      * Data must be valid against exactly one of the given schemas.

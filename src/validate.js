@@ -393,7 +393,7 @@ export const toDate = (v) => v && new Date(v)
 
 export class DateT extends NumberT {
   type = 'date'
-  /** @type {((v: Date, e?: ValidationFailure) => boolean)|undefined} */
+  /** @type {((v: Date|number, e?: ValidationFailure) => boolean)|undefined} */
   // @ts-expect-error
   _validate
 
@@ -404,7 +404,7 @@ export class DateT extends NumberT {
    *  max?: Date | number | string
    *  exclusiveMin?: boolean
    *  exclusiveMax?: boolean
-   *  validate?: (v: Date, e?: ValidationFailure) => boolean
+   *  validate?: (v: Date|number, e?: ValidationFailure) => boolean
    * }} [opts]
    */
   constructor (opts) {
@@ -438,7 +438,6 @@ export class DateT extends NumberT {
    * clones the schema
    * @returns {DateT}
    */
-  // @ts-expect-error
   clone () {
     // @ts-expect-error
     return super._clone(DateT)
@@ -506,7 +505,7 @@ export class DateT extends NumberT {
  *  max?: Date | number | string
  *  exclusiveMin?: boolean
  *  exclusiveMax?: boolean
- *  validate?: (v: Date, e?: ValidationFailure) => boolean
+ *  validate?: (v: Date|number, e?: ValidationFailure) => boolean
  * }} [opts]
  */
 export const dateT = (opts) => new DateT(opts)
@@ -876,6 +875,46 @@ export class ObjectT extends BaseT {
  * }} [opts]
  */
 export const objectT = (schema, opts) => new ObjectT(schema, opts)
+
+export class InstanceT extends BaseT {
+  type = 'instance'
+
+  constructor (instance, opts) {
+    super()
+    addOpts(this, opts)
+    this._instance = instance
+  }
+
+  clone () {
+    // @ts-expect-error
+    return super._clone(InstanceT, this._instance)
+  }
+
+  validate (v, e = {}) {
+    const { _required, _validate } = this
+    if (!_required && v === undefined) {
+      return true
+    }
+    if (!(v instanceof this._instance)) {
+      e.message = `not an instance of ${this._instance?.name}`
+      return false
+    }
+    if (_validate && !_validate(v, e)) {
+      e.message = e.message || 'instance validate failed'
+      return false
+    }
+    return true
+  }
+}
+
+/**
+ * @param {InstanceType<any>} instance
+ * @param {{
+ *  required?: boolean
+ *  validate?: (v: object, e?: ValidationFailure) => boolean
+ * }} [opts]
+ */
+export const instanceT = (instance, opts) => new InstanceT(instance, opts)
 
 export class OneOf extends BaseT {
   type = 'oneOf'

@@ -25,7 +25,9 @@ import {
   ObjectT,
   OneOf,
   AnyOf,
-  AllOf
+  AllOf,
+  instanceT,
+  InstanceT
 } from '../src/index.js'
 
 describe('validate', function () {
@@ -753,6 +755,40 @@ describe('validate', function () {
       assert.ok(clone instanceof ObjectT)
       assert.notEqual(clone, schema)
       assert.notEqual(clone._cast, schema._cast)
+    })
+  })
+
+  describe('instanceT', function () {
+    it('shall validate', function () {
+      const schema = instanceT(String)
+      // eslint-disable-next-line no-new-wrappers
+      equal(schema.validate(new String('string')), true)
+
+      const e = {}
+      // eslint-disable-next-line no-new-wrappers
+      equal(schema.validate(new Number(7), e), false)
+      equal(e.message, 'not an instance of String')
+    })
+
+    it('is not required', function () {
+      const schema = instanceT(String)
+      const err = schema.analyze()
+      equal(err, null)
+    })
+
+    it('shall clone', function () {
+      const schema = instanceT(Number)
+      const clone = schema.clone().cast()
+      assert.ok(clone instanceof InstanceT)
+      assert.notEqual(clone, schema)
+      assert.notEqual(clone._cast, schema._cast)
+    })
+
+    it('custom validation', function () {
+      const schema = instanceT(Number).custom(v => v === 7)
+      // eslint-disable-next-line no-new-wrappers
+      const err = schema.analyze(new Number(42))
+      equal(err.message, 'instance validate failed')
     })
   })
 

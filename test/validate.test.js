@@ -800,6 +800,40 @@ describe('validate', function () {
       assert.ok(clone instanceof OneOf)
       assert.notEqual(clone, schema)
     })
+
+    it('optional value', function () {
+      const schema = oneOf([stringT(), numberT()])
+      const err = schema.analyze()
+      equal(err, null)
+    })
+
+    it('requires a value', function () {
+      const schema = oneOf([stringT(), numberT()]).required()
+      const err = schema.analyze()
+      equal(err.message, 'oneOf failed, matches 2 schemas')
+    })
+
+    it('requires at least a number', function () {
+      const schema = oneOf([stringT(), numberT().required()])
+      const err = schema.analyze()
+      equal(err.message, 'oneOf failed, number required')
+    })
+
+    it('fails with custom validation', function () {
+      const schema = oneOf([stringT(), numberT()]).custom((v) => {
+        return v === 3
+      })
+      const err = schema.analyze(1)
+      equal(err.message, 'oneOf validate failed')
+    })
+
+    it('ok with custom validation', function () {
+      const schema = oneOf([stringT(), numberT()]).custom((v) => {
+        return v === 3
+      })
+      const err = schema.analyze(3)
+      equal(err, null)
+    })
   })
 
   describe('anyOf', function () {
@@ -830,6 +864,14 @@ describe('validate', function () {
       const clone = schema.clone()
       assert.ok(clone instanceof AnyOf)
       assert.notEqual(clone, schema)
+    })
+
+    it('fails with custom validation', function () {
+      const schema = anyOf([stringT(), numberT()]).custom((v) => {
+        return v === 3
+      })
+      const err = schema.analyze(1)
+      equal(err.message, 'anyOf validate failed')
     })
   })
 
@@ -866,6 +908,17 @@ describe('validate', function () {
       const clone = schema.clone()
       assert.ok(clone instanceof AllOf)
       assert.notEqual(clone, schema)
+    })
+
+    it('fails with custom validation', function () {
+      const schema = allOf([
+        objectT({ a: integerT().min(3) }).additionalProperties(),
+        objectT({ b: integerT().min(5) }).additionalProperties()
+      ]).custom((v) => {
+        return v.a === 3
+      })
+      const err = schema.analyze({ a: 4, b: 7 })
+      equal(err.message, 'allOf validate failed')
     })
   })
   describe('not', function () {

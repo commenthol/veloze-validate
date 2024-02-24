@@ -7,7 +7,6 @@
  * }} ValidationFailure
  */
 /** @typedef {(v: any, e?: ValidationFailure) => boolean} ValidationFn */
-/** @typedef {BaseT|BooleanT|NumberT|IntegerT|DateT|StringT|EnumT|ArrayT|ObjectT|OneOf|AnyOf|AllOf} Schema */
 
 /**
  * shortcut for { required: true }
@@ -59,10 +58,12 @@ export class ValidationError extends Error {
     super(message)
     this.path = e?.path
     this.failures = e?.failures
+    this.additionalProps = e?.additionalProps
   }
 }
 
 export class BaseT {
+  type = 'base'
   /** @type {boolean|undefined} */
   _required
   /** @type {boolean|undefined} */
@@ -685,7 +686,7 @@ export class ArrayT extends BaseT {
   _validate = undefined
 
   /**
-   * @param {Schema} schema
+   * @param {BaseT} schema
    * @param {{
    *  required?: boolean
    *  min?: number
@@ -751,7 +752,7 @@ export class ArrayT extends BaseT {
 }
 
 /**
- * @param {Schema} schema
+ * @param {BaseT} schema
  * @param {{
  *  required?: boolean
  *  min?: number
@@ -772,7 +773,7 @@ export class ObjectT extends BaseT {
   _validate
 
   /**
-   * @param {{[key: string]: Schema}} schema
+   * @param {{[key: string]: BaseT}} schema
    * @param {{
    *  required?: boolean
    *  min?: number
@@ -865,7 +866,7 @@ export class ObjectT extends BaseT {
 }
 
 /**
- * @param {{[key: string]: Schema}} schema
+ * @param {{[key: string]: BaseT}} schema
  * @param {{
  *  required?: boolean
  *  min?: number
@@ -876,17 +877,18 @@ export class ObjectT extends BaseT {
  */
 export const objectT = (schema, opts) => new ObjectT(schema, opts)
 
-export class OneOf {
+export class OneOf extends BaseT {
   type = 'oneOf'
 
   /**
    * Data must be valid against exactly one of the given schemas.
-   * @param {Schema[]} schemas
+   * @param {BaseT[]} schemas
    */
   constructor (schemas) {
     if (!Array.isArray(schemas)) {
       throw TypeError('schema array expected')
     }
+    super()
     this._schemas = schemas
   }
 
@@ -895,7 +897,8 @@ export class OneOf {
    * @returns {OneOf}
    */
   clone () {
-    return new OneOf(this._schemas)
+    // @ts-expect-error
+    return super._clone(OneOf, this._schemas)
   }
 
   validate (v, e = {}) {
@@ -903,33 +906,45 @@ export class OneOf {
     for (const schema of this._schemas) {
       if (schema.validate(v)) {
         matched++
+      } else if (v === undefined && schema._required) {
+        e.message = `oneOf failed, ${schema.type} required`
+        return false
       }
     }
-    if (matched === 1) {
-      return true
+    const { _required, _validate } = this
+    if (matched !== 1) {
+      if (!_required && v === undefined) {
+        return true
+      }
+      e.message = `oneOf failed, matches ${matched} schemas`
+      return false
     }
-    e.message = `oneOf failed, matches ${matched} schemas`
-    return false
+    if (_validate && !_validate(v, e)) {
+      e.message = e.message || 'oneOf validate failed'
+      return false
+    }
+    return true
   }
 }
 
 /**
  * Data must be valid against exactly one of the given schemas.
- * @param {Schema[]} schemas
+ * @param {BaseT[]} schemas
  */
 export const oneOf = (schemas) => new OneOf(schemas)
 
-export class AnyOf {
+export class AnyOf extends BaseT {
   type = 'anyOf'
 
   /**
    * Data must be valid against any (one or more) of the given schemas
-   * @param {Schema[]} schemas
+   * @param {BaseT[]} schemas
    */
   constructor (schemas) {
     if (!Array.isArray(schemas)) {
       throw TypeError('schema array expected')
     }
+    super()
     this._schemas = schemas
   }
 
@@ -938,7 +953,8 @@ export class AnyOf {
    * @returns {AnyOf}
    */
   clone () {
-    return new AnyOf(this._schemas)
+    // @ts-expect-error
+    return super._clone(AnyOf, this._schemas)
   }
 
   validate (v, e = {}) {
@@ -947,6 +963,10 @@ export class AnyOf {
       const _e = { path: [...path] }
       if (schema.validate(v, _e)) {
         Reflect.deleteProperty(e, 'failures')
+        if (this._validate && !this._validate(v, e)) {
+          e.message = e.message || 'anyOf validate failed'
+          return false
+        }
         return true
       }
       e.failures = e.failures || []
@@ -959,21 +979,22 @@ export class AnyOf {
 
 /**
  * Data must be valid against any (one or more) of the given schemas
- * @param {Schema[]} schemas
+ * @param {BaseT[]} schemas
  */
 export const anyOf = (schemas) => new AnyOf(schemas)
 
-export class AllOf {
+export class AllOf extends BaseT {
   type = 'allOf'
 
   /**
    * Data must be valid against all of the given schemas
-   * @param {Schema[]} schemas
+   * @param {BaseT[]} schemas
    */
   constructor (schemas) {
     if (!Array.isArray(schemas)) {
       throw TypeError('schema array expected')
     }
+    super()
     this._schemas = schemas
   }
 
@@ -982,7 +1003,8 @@ export class AllOf {
    * @returns {AllOf}
    */
   clone () {
-    return new AllOf(this._schemas)
+    // @ts-expect-error
+    return super._clone(AllOf, this._schemas)
   }
 
   validate (v, e = {}) {
@@ -997,13 +1019,17 @@ export class AllOf {
       }
       cnt++
     }
+    if (this._validate && !this._validate(v, e)) {
+      e.message = e.message || 'allOf validate failed'
+      return false
+    }
     return true
   }
 }
 
 /**
  * Data must be valid against all of the given schemas
- * @param {Schema[]} schemas
+ * @param {BaseT[]} schemas
  */
 export const allOf = (schemas) => new AllOf(schemas)
 

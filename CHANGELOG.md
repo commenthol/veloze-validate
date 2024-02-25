@@ -1,3 +1,19 @@
+# 0.10.0 (2024-02-25)
+
+### feat:
+
+- instance type (#e749237)
+
+### fix:
+
+- cast default values in objects (#af2f2b2)
+- extend oneOf, anyOf and allOf from BaseT class (#2dab009)
+- types (#16737fb)
+
+### test:
+
+- string or array of strings (#d6bc0fa)
+
 # 0.9.0 (2024-02-23)
 
 ### feat:

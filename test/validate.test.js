@@ -870,6 +870,14 @@ describe('validate', function () {
       const err = schema.analyze(3)
       equal(err, null)
     })
+
+    it('string or array of strings', function () {
+      const schema = oneOf([arrayT(stringT()), stringT()])
+      equal(schema.validate('one'), true)
+      equal(schema.validate(['one', 'two']), true)
+      equal(schema.validate(1), false)
+      equal(schema.validate([1, 'two']), false)
+    })
   })
 
   describe('anyOf', function () {

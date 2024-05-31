@@ -15,36 +15,42 @@
   "author": "commenthol <commenthol@gmail.com>",
   "type": "module",
   "main": "src/index.js",
-  "types": "types",
+  "types": "types/index.d.ts",
   "files": [
     "src",
     "types"
   ],
   "scripts": {
     "all": "npm-run-all lint c8 types",
-    "ci": "CI=true npm-run-all lint c8 types",
-    "changelog": "conv-changelog -t groups -o",
+    "build": "rollup -c rollup.config.js",
     "c8": "c8 -r html -r text npm t",
+    "readme": "markedpp -s --github -i README.md",
+    "changelog": "conv-changelog -t groups -o",
+    "ci": "CI=true npm-run-all lint c8 types",
     "lint": "eslint --ext js .",
     "test": "mocha",
-    "types": "rm -rf types; tsc",
-    "size": "terser -cm -o x.js src/validate.js ; ls -al x.js ; gzip -f x.js ; ls -al x.js.gz ; rm x.js.gz"
+    "types": "rm -rf types; tsc"
   },
   "mocha": {
     "recursive": true
   },
   "devDependencies": {
-    "@types/node": "^20.11.20",
+    "@rollup/plugin-babel": "^6.0.4",
+    "@rollup/plugin-terser": "^0.4.4",
+    "@types/node": "^20.12.13",
     "c8": "^9.1.0",
     "eslint": "^8.57.0",
     "eslint-config-standard": "^17.1.0",
     "eslint-plugin-import": "^2.29.1",
     "eslint-plugin-n": "^16.6.2",
-    "eslint-plugin-promise": "^6.1.1",
+    "eslint-plugin-promise": "^6.2.0",
     "js-yaml": "^4.1.0",
-    "mocha": "^10.3.0",
-    "npm-run-all2": "^6.1.2",
-    "typescript": "^5.3.3"
+    "mocha": "^10.4.0",
+    "npm-run-all2": "^6.2.0",
+    "rollup": "^4.18.0",
+    "rollup-plugin-cleanup": "^3.2.1",
+    "rollup-plugin-sourcemaps": "^0.6.3",
+    "typescript": "^5.4.5"
   },
   "engines": {
     "node": ">=18"

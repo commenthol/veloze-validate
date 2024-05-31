@@ -1,7 +1,7 @@
 import assert, { deepEqual } from 'assert/strict'
 import {
   toJsonSchema,
-  type as t,
+  t,
   stringFormatT,
   oneOf,
   anyOf,

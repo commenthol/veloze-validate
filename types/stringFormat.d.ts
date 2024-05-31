@@ -67,6 +67,7 @@ export function stringFormatT(opts?: {
     pattern?: RegExp | undefined;
     validate?: ((v: string, e?: ValidationFailure) => boolean) | undefined;
 } | undefined): StringFormatT;
+export { t };
 export function validateUrl(string: string, e?: import("./validate.js").ValidationFailure | undefined): boolean;
 export function validateUuid(string: string, e?: import("./validate.js").ValidationFailure | undefined): boolean;
 export function validateDateTime(string: string, e?: import("./validate.js").ValidationFailure | undefined): boolean;
@@ -84,3 +85,4 @@ export type EmailDomainValidationOptions = {
     minDomainSegments?: number | undefined;
 };
 import { StringT } from './validate.js';
+import { t } from './validate.js';

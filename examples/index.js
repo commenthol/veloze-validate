@@ -1,29 +1,20 @@
 /* eslint no-console: off */
-import {
-  booleanT,
-  numberT,
-  integerT,
-  stringT,
-  arrayT,
-  objectT,
-  oneOf,
-  allOf
-} from '../src/index.js'
+import { t } from '../src/index.js'
 
-const schema = objectT({
-  bool: booleanT(), // optional boolean
-  num: numberT().min(-1).max(10), // optional number [-1..10]
-  int: integerT().min(0).max(10), // optional integer [0,1,..10]
-  str: stringT(), // optional string
-  arr: arrayT(oneOf([stringT(), integerT()])), // optional array of string or integers
-  obj: objectT({
+const schema = t.object({
+  bool: t.boolean(), // optional boolean
+  num: t.number().min(-1).max(10), // optional number [-1..10]
+  int: t.integer().min(0).max(10), // optional integer [0,1,..10]
+  str: t.string(), // optional string
+  arr: t.array(t.oneOf([t.string(), t.integer()])), // optional array of string or integers
+  obj: t.object({
     // required nested object with
-    nested: stringT() // optional string
+    nested: t.string() // optional string
   }).required(),
-  all: allOf([
+  all: t.allOf([
     // either or both
-    objectT({ flag: booleanT() }).additionalProperties(),
-    objectT({ test: integerT() }).additionalProperties()
+    t.object({ flag: t.boolean() }).additionalProperties(),
+    t.object({ test: t.integer() }).additionalProperties()
   ])
 })
   .required()
@@ -59,3 +50,7 @@ const schemaCustom = schema.clone().custom((v, e) => {
 const err = schemaCustom.analyze({ bool: true, str: 'hello', obj: {} })
 console.log(err)
 // ValidationError: if bool is true then str must equal "hi"
+
+e = {}
+console.log(t.instance(Uint16Array).validate('a', e), e)
+// false { message: 'not an instance of Uint16Array' }

@@ -166,6 +166,17 @@ export class BaseT {
     }
     return null
   }
+
+  /**
+   * @throws
+   * @param {any} v
+   */
+  throws (v) {
+    const e = {}
+    if (!this.validate(v, e)) {
+      throw new ValidationError(e)
+    }
+  }
 }
 
 export class BooleanT extends BaseT {
@@ -1073,19 +1084,10 @@ export class AllOf extends BaseT {
 export const allOf = (schemas) => new AllOf(schemas)
 
 /**
- * not() turns an allow-list into a block-list.
- * This is explicitly not supported here as to enforce secure defaults.
- * If you know what you do, write your own not().
- */
-export function not () {
-  throw Error('"not()" may become a security nightmare... Avoid it.')
-}
-
-/**
  * exporting the types only
  * @example
  * ```js
- * import { types as t } from '@veloze/validate
+ * import { t } from '@veloze/validate
  * const schema = t.object({
  *  num: t.number(),
  *  str: t.string()
@@ -1093,7 +1095,7 @@ export function not () {
  * const valid = schema({ num: 1 })
  * ```
  */
-export const type = {
+export const t = {
   boolean: booleanT,
   number: numberT,
   integer: integerT,
@@ -1101,5 +1103,9 @@ export const type = {
   date: dateT,
   enum: enumT,
   array: arrayT,
-  object: objectT
+  object: objectT,
+  instance: instanceT,
+  oneOf,
+  anyOf,
+  allOf
 }

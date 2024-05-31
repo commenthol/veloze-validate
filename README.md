@@ -7,28 +7,33 @@
 > A schema validator
 
 Easy type validator.  
+
 The validator bails out on first encountered schema violation.  
 Uses safe bounds for all types, e.g. string is limit to 255 or less characters.
 
-Less than 9k if minimized, less then 2.5kB if gzipped.
+No external dependencies.
+
+Less than 15k if minimized, less then 5kB if gzipped.
 
 **Table of Contents**
 
 <!-- !toc -->
 
+* [@veloze/validate](#velozevalidate)
 * [Usage](#usage)
 * [API](#api)
-  * [booleanT()](#booleant)
-  * [numberT()](#numbert)
-  * [integerT()](#integert)
-  * [stringT()](#stringt)
+  * [t.boolean()](#tboolean)
+  * [t.number()](#tnumber)
+  * [t.integer()](#tinteger)
+  * [t.string()](#tstring)
   * [stringFormatT()](#stringformatt)
-  * [enumT()](#enumt)
-  * [arrayT()](#arrayt)
-  * [objectT()](#objectt)
-  * [oneOf()](#oneof)
-  * [anyOf()](#anyof)
-  * [allOf()](#allof)
+  * [t.enum()](#tenum)
+  * [t.array()](#tarray)
+  * [t.object()](#tobject)
+  * [t.instance()](#tinstance)
+  * [t.oneOf()](#toneof)
+  * [t.anyOf()](#tanyof)
+  * [t.allOf()](#tallof)
   * [cast()](#cast)
   * [toJsonSchema()](#tojsonschema)
 * [License](#license)
@@ -46,34 +51,21 @@ npm i @veloze/validate
 In your code:
 
 ```js
-import {
-  booleanT,
-  numberT,
-  integerT,
-  stringT,
-  arrayT,
-  objectT,
-  oneOf,
-  anyOf
-} from '@veloze/validate'
-
-// alternatively
-import { type as t, oneOf, anyOf } from '@veloze/validate'
-// then use `t.boolean()` instead of `booleanT()` aso...
+import { t } from '@veloze/validate'
 
 // required object where additionalProperties are allowed
-const schema = objectT({
-  bool: booleanT(), // optional boolean
-  num: numberT.min(-1).max(10), // optional number [-1..10]
-  int: integerT().min(0).max(10), // optional integer [0,1,..10]
-  str: stringT(), // optional string
-  arr: arrayT(oneOf([stringT(), integerT()])), // optional array of string or integers
-  obj: objectT({ // required nested object with
-    nested: stringT() // optional string
+const schema = t.object({
+  bool: t.boolean(), // optional boolean
+  num: t.number().min(-1).max(10), // optional number [-1..10]
+  int: t.integer().min(0).max(10), // optional integer [0,1,..10]
+  str: t.string(), // optional string
+  arr: t.array(t.oneOf([t.string(), t.integer()])), // optional array of string or integers
+  obj: t.object({ // required nested object with
+    nested: t.string() // optional string
   }).required(),
-  all: allOf([ // both must match
-    objectT({ flag: booleanT() }).additionalProperties(),
-    objectT({ test: integerT() }).additionalProperties()
+  all: t.allOf([ // both must match
+    t.object({ flag: t.boolean() }).additionalProperties(),
+    t.object({ test: t.integer() }).additionalProperties()
   ])
 }).required().additionalProperties()
 
@@ -96,12 +88,18 @@ e = {}
 valid = schema.validate({ all: { flag: true, test: '1' }, obj: {} }, e)
 console.log(valid, e)
 // false {"path":["all"],"message":"allOf failed in schema[1]","failures":[{"path":["all","test"],"message":"not a number"}]}
+
+// `.analyze(v)` returns an ValidationError if validation fails
+const err = schema.analyze({ all: { flag: true, test: '1' }, obj: {} })
+
+// `.throws(v)` throws an ValidationError if validation fails
+schema.throws({ all: { flag: true, test: '1' }, obj: {} })
 ```
 
 To validate the above schema with a custom function you can do:
 
 ```js
-// optionally clone the schema
+// clone the schema (optionally)
 const clone = schema.clone()
   .custom((v, e = {}) => { // and add a custom validation function
     if (v.bool && v.str !== 'hi') {
@@ -111,7 +109,7 @@ const clone = schema.clone()
     return true
   })
 
-// analyze() returns a ValidationError (but does not throw)
+// `.analyze(v)` returns a ValidationError (but does not throw)
 const err = clone.analyze({ bool: true, str: 'hello', obj: {} })
 console.log(err)
 // ValidationError: if bool is true then str must equal "hi"
@@ -131,7 +129,7 @@ export interface {
 In case of failure the reason for the validation failure is returned in the optional ValidationFailure object.
 
 ```js
-const schema = numberT()
+const schema = t.number()
 
 /* check validity */
 const failure = {}
@@ -141,11 +139,37 @@ const isValid = schema.validate('str', failure)
 /* or analyze with ValidationError (or null) */
 const err = schema.analyze('str')
 if (err) throw err
+
+/* or throw immediately with ValidationError  */
+schema.throws('str')
 ```
 
-## booleanT()
+## t.boolean()
 
 Validates if type is boolean.
+
+*usage*
+
+```js
+// optional
+const schema = t.boolean()
+schema.validate(undefined) // true
+schema.validate(true)      // true
+schema.validate(false)     // true
+schema.validate('true')    // false
+
+// type is required
+const schema = t.boolean().required()
+schema.validate(undefined) // false
+schema.validate(true)      // true
+schema.validate(false)     // true
+schema.validate('true')    // false
+
+// with custom validate function
+const schema = t.boolean({ validate: (v) => v === false })
+schema.validate(true)      // false
+schema.validate(false)     // true
+```
 
 *typedef*
 
@@ -163,36 +187,35 @@ export function booleanT(
   clone(): this
   custom((v: boolean, e?: ValidationFailure) => boolean): this
   validate(v: any, e?: {}): boolean
-  analyze(v: any): ValidationError | null 
+  analyze(v: any): ValidationError | null
+  throws(v: any): void
 }
 ```
+
+## t.number()
+
+Validates if type is number.
 
 *usage*
 
 ```js
 // optional
-const schema = booleanT()
+const schema = t.number()
 schema.validate(undefined) // true
-schema.validate(true)      // true
-schema.validate(false)     // true
-schema.validate('true')    // false
+schema.validate(0.1) // true
+schema.validate('0') // false
 
 // type is required
-const schema = booleanT({ required: true })
+const schema = t.number().required()
 schema.validate(undefined) // false
-schema.validate(true)      // true
-schema.validate(false)     // true
-schema.validate('true')    // false
+schema.validate(0.1) // true
 
-// with custom validate function
-const schema = booleanT({ validate: (v) => v === false })
-schema.validate(true)      // false
-schema.validate(false)     // true
+// min, max check
+const schema = t.number({ min: 0, max: 1, exclusiveMax: true })
+schema.validate(0) // true
+schema.validate(1) // false
+schema.validate(0.9999) // true
 ```
-
-## numberT()
-
-Validates if type is number.
 
 *typedef*
 
@@ -219,33 +242,28 @@ export function numberT(
   custom((v: number, e?: ValidationFailure) => boolean): this
   validate(v: any, e?: {}): boolean
   analyze(v: any): ValidationError | null
+  throws(v: any): void
 }
 ```
+
+## t.integer()
+
+Validates if type is integer.
 
 *usage*
 
 ```js
 // optional
-const schema = numberT()
+const schema = t.integer()
 schema.validate(undefined) // true
-schema.validate(0.1) // true
-schema.validate('0') // false
-
-// type is required
-const schema = numberT().required()
-schema.validate(undefined) // false
-schema.validate(0.1) // true
+schema.validate(0.1) // false
+schema.validate(1) // true
 
 // min, max check
-const schema = numberT({ min: 0, max: 1, exclusiveMax: true })
+const schema = t.integer({ min: 0, max: 2, exclusiveMax: true })
 schema.validate(0) // true
-schema.validate(1) // false
-schema.validate(0.9999) // true
+schema.validate(2) // false
 ```
-
-## integerT()
-
-Validates if type is integer.
 
 *typedef*
 
@@ -272,28 +290,36 @@ export function integerT(
   custom((v: number, e?: ValidationFailure) => boolean): this
   validate(v: any, e?: {}): boolean
   analyze(v: any): ValidationError | null
+  throws(v: any): void
 }
 ```
+
+## t.string()
+
+Validates if type is string.
+Defaults to minimum length 0 and maximum length 255.
 
 *usage*
 
 ```js
 // optional
-const schema = integerT()
-schema.validate(undefined) // true
-schema.validate(0.1) // false
-schema.validate(1) // true
+const schema = t.string()
+schema.validate(undefined)  // true
+schema.validate('')         // true
+schema.validate('text')     // true
+schema.validate(0.1)        // false
 
-// min, max check
-const schema = numberT({ min: 0, max: 2, exclusiveMax: true })
-schema.validate(0) // true
-schema.validate(2) // false
+// type is required
+const schema = t.string().required()
+schema.validate(undefined)  // false
+schema.validate('')         // false
+schema.validate('text')     // true
+
+// pattern check
+const schema = t.string().pattern(/^ab/)
+schema.validate('abc')      // true
+schema.validate('bcd')      // false
 ```
-
-## stringT()
-
-Validates if type is string.
-Defaults to minimum length 0 and maximum length 255.
 
 *typedef*
 
@@ -318,29 +344,8 @@ export function stringT(
   custom((v: number, e?: ValidationFailure) => boolean): this
   validate(v: any, e?: {}): boolean
   analyze(v: any): ValidationError | null
+  throws(v: any): void
 }
-```
-
-*usage*
-
-```js
-// optional
-const schema = stringT()
-schema.validate(undefined)  // true
-schema.validate('')         // true
-schema.validate('text')     // true
-schema.validate(0.1)        // false
-
-// type is required
-const schema = stringT().required()
-schema.validate(undefined)  // false
-schema.validate('')         // false
-schema.validate('text')     // true
-
-// pattern check
-const schema = stringT().pattern(/^ab/)
-schema.validate('abc')      // true
-schema.validate('bcd')      // false
 ```
 
 ## stringFormatT()
@@ -359,7 +364,7 @@ Validates string formats like:
 - hostname
 
 ```ts
-export function stringFromatT(
+export function stringFormatT(
   opts?:
     | {
         required?: boolean | undefined
@@ -379,6 +384,7 @@ export function stringFromatT(
   custom((v: number, e?: ValidationFailure) => boolean): this
   validate(v: any, e?: {}): boolean
   analyze(v: any): ValidationError | null
+  throws(v: any): void
 
   /** validates url */
   url(): this;
@@ -412,30 +418,45 @@ export function stringFromatT(
 Examples:
 
 ```js
-import { stringFormatT } from '@veloze/validate'
+import { t } from '@veloze/validate'
 
-stringFormatT().url().validate('https://foo.bar/path?a=1?b=2')
+t.string().url().validate('https://foo.bar/path?a=1?b=2')
 
-stringFormatT().uuid().validate('641663d3-4689-4ab0-842d-11fe8bfcfb17')
+t.string().uuid().validate('641663d3-4689-4ab0-842d-11fe8bfcfb17')
 
-stringFormatT().dateTime().validate('2020-12-01T12:01:02Z')
+t.string().dateTime().validate('2020-12-01T12:01:02Z')
 
-stringFormatT().date().validate('2020-12-01')
+t.string().date().validate('2020-12-01')
 
-stringFormatT().time().validate('16:39:57-08:00')
+t.string().time().validate('16:39:57-08:00')
 
-stringFormatT().ipv4().validate('255.1.1.0')
+t.string().ipv4().validate('255.1.1.0')
 
-stringFormatT().ipv6().validate('fe80::7:8')
+t.string().ipv6().validate('fe80::7:8')
 
-stringFormatT().email().validate('ɱë@ťëŝṫ.ʈḽḏ')
+t.string().email().validate('ɱë@ťëŝṫ.ʈḽḏ')
 
-stringFormatT().hostname().validate('test.tld')
+t.string().hostname().validate('test.tld')
 ```
 
-## enumT()
+## t.enum()
 
 Validates for allowed list of values.
+
+*usage*
+
+```js
+// optional number type
+const schema = t.enum([2, 4, 8])
+schema.validate(undefined) // true
+schema.validate(2) // true
+schema.validate(3) // false
+
+// mixed types
+const schema = t.enum([2, 'four'])
+schema.validate(2) // true
+schema.validate('four') // true
+```
 
 *typedef*
 
@@ -452,28 +473,27 @@ export function enumT(
   required(): this
   validate(v: any, e?: {}): boolean
   analyze(v: any): ValidationError | null
+  throws(v: any): void
 }
 ```
+
+## t.array()
+
+Validates array for given schema.
+Defaults to minimum array length of 0 and maximum array length of 255 items.
 
 *usage*
 
 ```js
-// optional number type
-const schema = enumT([2, 4, 8])
-schema.validate(undefined) // true
-schema.validate(2) // true
-schema.validate(3) // false
+const subschema = t.number({ min: 0, max: 100, exclusiveMax: true })
+const schema = t.array(subschema, { ...REQUIRED, min: 2, max: 10 })
 
-// mixed types
-const schema = enumT([2, 'four'])
-schema.validate(2) // true
-schema.validate('four') // true
+schema.validate([0, 55, 12]) // true
+
+const failure = {}
+schema.validate([4, -2, 4], failure)
+// failure == { message: 'number less than min=0', path: [ '1' ] }
 ```
-
-## arrayT()
-
-Validates array for given schema.
-Defaults to minimum array length of 0 and maximum array length of 255 items.
 
 *typedef*
 
@@ -496,26 +516,38 @@ export function arrayT(
   custom((v: any[], e?: ValidationFailure) => boolean): this
   validate(v: any, e?: {}): boolean
   analyze(v: any): ValidationError | null
+  throws(v: any): void
 }
 ```
+
+## t.object()
+
+Validates an object.
+Defaults to min=0 and max=255 properties.
 
 *usage*
 
 ```js
-const subschema = numberT({ min: 0, max: 100, exclusiveMax: true })
-const schema = arrayT(subschema, { ...REQUIRED, min: 2, max: 10 })
+const subschema = {
+  num: t.number({ min: 0, max: 100, exclusiveMax: true }),
+  str: t.string().required()
+}
+const schema = t.object(subschema, { min: 1 }).required().additionalProperties()
 
-schema.validate([0, 55, 12]) // true
+schema.validate({ str: 'hi', num: 2 }) // true
 
-const failure = {}
-schema.validate([4, -2, 4], failure)
-// failure == { message: 'number less than min=0', path: [ '1' ] }
+let failure = {}
+schema.validate({}, failure)
+// failure == { message: 'object has less than 1 properties' }
+
+failure = {}
+schema.validate({ str: 1 }, failure)
+// failure == { path: [ 'str' ], message: 'not a string' }
+
+failure = {}
+schema.validate({ str: 'hi', num: 'abc' }, failure)
+// failure == { path: [ 'num' ], message: 'not a number' }
 ```
-
-## objectT()
-
-Validates an object.
-Defaults to min=0 and max=255 properties.
 
 *typedef*
 
@@ -542,36 +574,34 @@ export function objectT(
   custom((v: object, e?: ValidationFailure) => boolean): this
   validate(v: any, e?: {}): boolean
   analyze(v: any): ValidationError | null
+  throws(v: any): void
 }
 ```
+
+## t.instance()
+
+Validates instance of object.
 
 *usage*
 
 ```js
-const subschema = {
-  num: numberT({ min: 0, max: 100, exclusiveMax: true }),
-  str: stringT().required()
-}
-const schema = objectT(subschema, { ...REQUIRED, ...ADD_PROPS, min: 1 })
-
-schema.validate({ str: 'hi', num: 2 }) // true
-
-let failure = {}
-schema.validate({}, failure)
-// failure == { message: 'object has less than 1 properties' }
-
-failure = {}
-schema.validate({ str: 1 }, failure)
-// failure == { path: [ 'str' ], message: 'not a string' }
-
-failure = {}
-schema.validate({ str: 'hi', num: 'abc' }, failure)
-// failure == { path: [ 'num' ], message: 'not a number' }
+const schema = t.instance(UInt8Array)
+schema.validate('a')  // false { message: 'not an instance of Uint16Array' }
 ```
 
-## oneOf()
+## t.oneOf()
 
 Data must be valid against exactly one of the given schemas.
+
+*usage*
+
+```js
+// schema must either be a string or a number
+const schema = t.oneOf([
+  t.string().required(), 
+  t.number().required()
+])
+```
 
 *typedef*
 
@@ -580,37 +610,21 @@ export function oneOf(schemas: BaseT[]): {
   clone(): this
   validate(v: any, e?: {}): boolean;
   analyze(v: any): ValidationError | null
+  throws(v: any): void
 }
 ```
 
-*usage*
-
-```js
-// schema must either be a string or a number
-const schema = oneOf([stringT(REQUIRED), numberT(REQUIRED)])
-```
-
-## anyOf()
+## t.anyOf()
 
 Data must be valid against any (one or more) of the given schemas
-
-*typedef*
-
-```ts
-export function anyOf(schemas: BaseT[]): {
-  clone(): this
-  validate(v: any, e?: {}): boolean
-  analyze(v: any): ValidationError | null
-}
-```
 
 *usage*
 
 ```js
 // object must either contain { str: string } or { num: number } or both
-const schema = anyOf([
-  objectT({ str: stringT(REQUIRED) }, ADD_PROPS),
-  objectT({ num: numberT(REQUIRED) }, ADD_PROPS)
+const schema = t.anyOf([
+  t.object({ str: t.string().required() }).additionalProperties(),
+  t.object({ num: t.number().required() }).additionalProperties()
 ])
 
 schema.validate({}, failure) // false
@@ -622,27 +636,28 @@ schema.validate({ num: 0 }) // true
 schema.validate({ str: '', num: 0 }) // true
 ```
 
-## allOf()
-
-Data must be valid against all of the given schemas
-
 *typedef*
 
 ```ts
-export function allOf(schemas: BaseT[]): {
+export function anyOf(schemas: BaseT[]): {
   clone(): this
-  validate(v: any, e?: {}): boolean;
+  validate(v: any, e?: {}): boolean
   analyze(v: any): ValidationError | null
+  throws(v: any): void
 }
 ```
+
+## t.allOf()
+
+Data must be valid against all of the given schemas
 
 *usage*
 
 ```js
 // object must either contain { str: string } and { num: number }
-const schema = allOf([
-  objectT({ str: stringT().min(3) }).additionalProperties(),
-  objectT({ num: numberT().min(0).max(10) }).additionalProperties()
+const schema = t.allOf([
+  t.object({ str: t.string().min(3) }).additionalProperties(),
+  t.object({ num: t.number().min(0).max(10) }).additionalProperties()
 ])
 
 schema.validate({}) // true
@@ -654,6 +669,17 @@ schema.validate({ str: 'aaa', num: -1 }, failure)
 // false {"message":"allOf failed in schema[1]","failures":[{"path":["num"],"message":"number less than min=0"}]}
 ```
 
+*typedef*
+
+```ts
+export function allOf(schemas: BaseT[]): {
+  clone(): this
+  validate(v: any, e?: {}): boolean;
+  analyze(v: any): ValidationError | null
+  throws(v: any): void
+}
+```
+
 ## cast()
 
 Casts or coerces validated values from schema and applies default values.
@@ -661,11 +687,11 @@ Casts or coerces validated values from schema and applies default values.
 *usage*
 
 ```js
-import { booleanT, numberT, oneOf, cast } from '@veloze/validate'
+import { t, cast } from '@veloze/validate'
 
-const schema = oneOf([
-  booleanT({ cast: true }),
-  numberT({ cast: true })
+const schema = t.oneOf([
+  t.boolean({ cast: true }),
+  t.number({ cast: true })
 ])
 const castValues = cast(schema)
 
@@ -704,15 +730,15 @@ Set default when value is undefined:
 
 ```js
 // default to a static value
-const schema = stringT().default('4h8pxby0w77')
+const schema = t.string().default('hi_world')
 const castValue = cast(schema)
 console.log(schema.validate(), castValue())
-// true 4h8pxby0w77
+// true hi_world
 ```
 
 ```js
 // default to a dynamic value
-const schema = stringT().default(() => Math.random().toString(36).slice(2))
+const schema = t.string().default(() => Math.random().toString(36).slice(2))
 const castValue = cast(schema)
 console.log(schema.validate(), castValue())
 // true la7rqqds4o
@@ -733,11 +759,11 @@ A conversion from JSON schema is not supported.
 import { toJsonSchema } from '@veloze/validator'
 
 const schema = oneOf([
-  objectT({
-    num: numbertT(),
-    str: stringT()
+  t.object({
+    num: t.number(),
+    str: t.string()
   }),
-  booleanT()
+  t.boolean()
 ])
 
 toJsonSchema(object)

@@ -1,9 +1,9 @@
 /* eslint no-console: off */
-import { booleanT, numberT, oneOf, cast } from '../src/index.js'
+import { t, cast } from '../src/index.js'
 
-const schema = oneOf([
-  booleanT({ cast: true }),
-  numberT({ cast: true })
+const schema = t.oneOf([
+  t.boolean({ cast: true }),
+  t.number({ cast: true })
 ])
 const castValues = cast(schema)
 

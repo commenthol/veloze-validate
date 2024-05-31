@@ -1,10 +1,4 @@
 /**
- * not() turns an allow-list into a block-list.
- * This is explicitly not supported here as to enforce secure defaults.
- * If you know what you do, write your own not().
- */
-export function not(): void;
-/**
  * @typedef {{
  *  message?: string
  *  path?: string[]
@@ -95,6 +89,11 @@ export class BaseT {
      * @returns {ValidationError|null}
      */
     analyze(v: any): ValidationError | null;
+    /**
+     * @throws
+     * @param {any} v
+     */
+    throws(v: any): void;
 }
 export class BooleanT extends BaseT {
     /**
@@ -432,7 +431,7 @@ export class AllOf extends BaseT {
     validate(v: any, e?: {}): boolean;
 }
 export function allOf(schemas: BaseT[]): AllOf;
-export namespace type {
+export namespace t {
     export { booleanT as boolean };
     export { numberT as number };
     export { integerT as integer };
@@ -441,15 +440,19 @@ export namespace type {
     export { enumT as enum };
     export { arrayT as array };
     export { objectT as object };
+    export { instanceT as instance };
+    export { oneOf };
+    export { anyOf };
+    export { allOf };
 }
 export type Options = {
-    required?: boolean | undefined;
-    cast?: boolean | undefined;
-    validate?: ((v: any, e?: ValidationFailure) => boolean) | undefined;
-    min?: number | undefined;
-    max?: number | undefined;
-    exclusiveMin?: boolean | undefined;
-    exclusiveMax?: boolean | undefined;
+    required?: boolean;
+    cast?: boolean;
+    validate?: (v: any, e?: ValidationFailure) => boolean;
+    min?: number;
+    max?: number;
+    exclusiveMin?: boolean;
+    exclusiveMax?: boolean;
 };
 export type ValidationFailure = {
     message?: string;

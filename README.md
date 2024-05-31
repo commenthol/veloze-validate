@@ -363,6 +363,32 @@ Validates string formats like:
 - email 
 - hostname
 
+*usage*
+
+```js
+import { t } from '@veloze/validate'
+
+t.string().url().validate('https://foo.bar/path?a=1?b=2')
+
+t.string().uuid().validate('641663d3-4689-4ab0-842d-11fe8bfcfb17')
+
+t.string().dateTime().validate('2020-12-01T12:01:02Z')
+
+t.string().date().validate('2020-12-01')
+
+t.string().time().validate('16:39:57-08:00')
+
+t.string().ipv4().validate('255.1.1.0')
+
+t.string().ipv6().validate('fe80::7:8')
+
+t.string().email().validate('ɱë@ťëŝṫ.ʈḽḏ')
+
+t.string().hostname().validate('test.tld')
+```
+
+*typedef*
+
 ```ts
 export function stringFormatT(
   opts?:
@@ -413,30 +439,6 @@ export function stringFormatT(
    */
   hostname(options?: {ascii?: boolean, minDomainSegments?: number}): this;
 }
-```
-
-Examples:
-
-```js
-import { t } from '@veloze/validate'
-
-t.string().url().validate('https://foo.bar/path?a=1?b=2')
-
-t.string().uuid().validate('641663d3-4689-4ab0-842d-11fe8bfcfb17')
-
-t.string().dateTime().validate('2020-12-01T12:01:02Z')
-
-t.string().date().validate('2020-12-01')
-
-t.string().time().validate('16:39:57-08:00')
-
-t.string().ipv4().validate('255.1.1.0')
-
-t.string().ipv6().validate('fe80::7:8')
-
-t.string().email().validate('ɱë@ťëŝṫ.ʈḽḏ')
-
-t.string().hostname().validate('test.tld')
 ```
 
 ## t.enum()

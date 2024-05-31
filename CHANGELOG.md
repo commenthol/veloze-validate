@@ -1,3 +1,15 @@
+# 0.11.1 (2024-05-31)
+
+### docs:
+
+- fix stringFormatT typedef and usage (#af064aa)
+
+# 0.11.0 (2024-05-31)
+
+### fix:
+
+- simplify with `t` export (#8a2fe7d)
+
 # 0.10.0 (2024-02-25)
 
 ### feat:

@@ -1,8 +1,8 @@
-# 0.11.1 (2024-05-31)
+# 0.11.1 (2024-06-08)
 
 ### docs:
 
-- fix stringFormatT typedef and usage (#af064aa)
+- fix stringFormatT typedef and usage (#0b6f7ed)
 
 # 0.11.0 (2024-05-31)
 

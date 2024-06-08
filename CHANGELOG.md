@@ -1,3 +1,9 @@
+# 0.11.2 (2024-06-08)
+
+### docs:
+
+- fixing stringFormat type exported as t.string() (#27d01d4)
+
 # 0.11.1 (2024-06-08)
 
 ### docs:

@@ -1,4 +1,4 @@
-import { StringT, t } from './validate.js'
+import { StringT, t as types } from './validate.js'
 
 /*
  * for json schema formats see
@@ -126,8 +126,7 @@ export class StringFormatT extends StringT {
  */
 export const stringFormatT = (opts) => new StringFormatT(opts)
 
-t.string = stringFormatT
-export { t }
+export const t = { ...types, string: stringFormatT }
 
 /**
  * @param {string} string

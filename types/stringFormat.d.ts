@@ -67,7 +67,71 @@ export function stringFormatT(opts?: {
     pattern?: RegExp | undefined;
     validate?: ((v: string, e?: ValidationFailure) => boolean) | undefined;
 } | undefined): StringFormatT;
-export { t };
+export const t: {
+    string: (opts?: {
+        required?: boolean | undefined;
+        min?: number | undefined;
+        max?: number | undefined;
+        pattern?: RegExp | undefined;
+        validate?: ((v: string, e?: ValidationFailure) => boolean) | undefined;
+    } | undefined) => StringFormatT;
+    boolean: (opts?: {
+        required?: boolean | undefined;
+        cast?: boolean | undefined;
+        validate?: ((v: number, e?: import("./validate.js").ValidationFailure | undefined) => boolean) | undefined;
+    } | undefined) => import("./validate.js").BooleanT;
+    number: (opts?: {
+        required?: boolean | undefined;
+        cast?: boolean | undefined;
+        min?: number | undefined;
+        max?: number | undefined;
+        exclusiveMin?: boolean | undefined;
+        exclusiveMax?: boolean | undefined;
+        validate?: ((v: number, e?: import("./validate.js").ValidationFailure | undefined) => boolean) | undefined;
+    } | undefined) => import("./validate.js").NumberT;
+    integer: (opts?: {
+        required?: boolean | undefined;
+        cast?: boolean | undefined;
+        min?: number | undefined;
+        max?: number | undefined;
+        exclusiveMin?: boolean | undefined;
+        exclusiveMax?: boolean | undefined;
+        validate?: ((v: number, e?: import("./validate.js").ValidationFailure | undefined) => boolean) | undefined;
+    } | undefined) => import("./validate.js").IntegerT;
+    date: (opts?: {
+        required?: boolean | undefined;
+        min?: string | number | Date | undefined;
+        max?: string | number | Date | undefined;
+        exclusiveMin?: boolean | undefined;
+        exclusiveMax?: boolean | undefined;
+        validate?: ((v: number | Date, e?: import("./validate.js").ValidationFailure | undefined) => boolean) | undefined;
+    } | undefined) => import("./validate.js").DateT;
+    enum: (list: (string | number | boolean)[], opts?: {
+        required?: boolean | undefined;
+    } | undefined) => import("./validate.js").EnumT;
+    array: (schema: import("./validate.js").BaseT, opts?: {
+        required?: boolean | undefined;
+        min?: number | undefined;
+        max?: number | undefined;
+        validate?: ((v: any[], e: import("./validate.js").ValidationFailure) => boolean) | undefined;
+    } | undefined) => import("./validate.js").ArrayT;
+    object: (schema: {
+        [key: string]: import("./validate.js").BaseT;
+    }, opts?: {
+        required?: boolean | undefined;
+        min?: number | undefined;
+        max?: number | undefined;
+        additionalProperties?: boolean | undefined;
+        validate?: ((v: any, e?: import("./validate.js").ValidationFailure | undefined) => boolean) | undefined;
+    } | undefined) => import("./validate.js").ObjectT;
+    instance: (instance: any, opts?: {
+        required?: boolean | undefined;
+        validate?: ((v: any, e?: import("./validate.js").ValidationFailure | undefined) => boolean) | undefined;
+    } | undefined) => import("./validate.js").InstanceT;
+    oneOf: (schemas: import("./validate.js").BaseT[]) => import("./validate.js").OneOf;
+    anyOf: (schemas: import("./validate.js").BaseT[]) => import("./validate.js").AnyOf;
+    allOf: (schemas: import("./validate.js").BaseT[]) => import("./validate.js").AllOf;
+};
 export function validateUrl(string: string, e?: import("./validate.js").ValidationFailure | undefined): boolean;
 export function validateUuid(string: string, e?: import("./validate.js").ValidationFailure | undefined): boolean;
 export function validateDateTime(string: string, e?: import("./validate.js").ValidationFailure | undefined): boolean;
@@ -85,4 +149,3 @@ export type EmailDomainValidationOptions = {
     minDomainSegments?: number | undefined;
 };
 import { StringT } from './validate.js';
-import { t } from './validate.js';

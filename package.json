@@ -1,6 +1,6 @@
 {
   "name": "@veloze/validate",
-  "version": "0.11.3",
+  "version": "0.11.4",
   "description": "A schema validator",
   "keywords": [
     "schema",

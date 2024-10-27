@@ -1,9 +1,5 @@
 import { equal, deepEqual } from 'assert/strict'
-import {
-  cast,
-  StringT,
-  t
-} from '../src/index.js'
+import { cast, StringT, t } from '../src/index.js'
 
 describe('cast', function () {
   describe('boolean', function () {
@@ -189,7 +185,10 @@ describe('cast', function () {
 
   describe('oneOf', function () {
     it('shall cast', function () {
-      const schema = t.oneOf([t.number({ cast: true }), t.boolean({ cast: true })])
+      const schema = t.oneOf([
+        t.number({ cast: true }),
+        t.boolean({ cast: true })
+      ])
       equal(cast(schema)('12.1'), 12.1)
       equal(cast(schema)('false'), false)
       equal(cast(schema)('true'), true)
@@ -199,7 +198,10 @@ describe('cast', function () {
 
   describe('anyOf', function () {
     it('shall cast', function () {
-      const schema = t.anyOf([t.number({ cast: true }), t.boolean({ cast: true })])
+      const schema = t.anyOf([
+        t.number({ cast: true }),
+        t.boolean({ cast: true })
+      ])
       equal(cast(schema)('12.1'), 12.1)
       equal(cast(schema)('false'), false)
       equal(cast(schema)('true'), true)
@@ -210,16 +212,13 @@ describe('cast', function () {
   describe('extension', function () {
     it('shall cast', function () {
       class RegExpT extends StringT {
-        coerce (v) {
+        coerce(v) {
           return new RegExp(v)
         }
       }
 
       const schema = new RegExpT().cast()
-      deepEqual(
-        cast(schema)('^hi'),
-        /^hi/
-      )
+      deepEqual(cast(schema)('^hi'), /^hi/)
     })
   })
 })

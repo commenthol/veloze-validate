@@ -752,11 +752,11 @@ describe('t', function () {
   describe('t.instance', function () {
     it('shall validate', function () {
       const schema = t.instance(String)
-      // eslint-disable-next-line no-new-wrappers
+
       equal(schema.validate(new String('string')), true)
 
       const e = {}
-      // eslint-disable-next-line no-new-wrappers
+
       equal(schema.validate(new Number(7), e), false)
       equal(e.message, 'not an instance of String')
     })
@@ -777,7 +777,7 @@ describe('t', function () {
 
     it('custom validation', function () {
       const schema = t.instance(Number).custom((v) => v === 7)
-      // eslint-disable-next-line no-new-wrappers
+
       const err = schema.analyze(new Number(42))
       equal(err.message, 'instance validate failed')
     })

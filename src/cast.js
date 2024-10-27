@@ -81,7 +81,7 @@ const oneOrAnyOfCoerce = (schemas) => (v) => {
  * @param {ValidationFn | any} schema
  * @returns {(any) => any}
  */
-export function cast (schema) {
+export function cast(schema) {
   const { type, format, coerce, _cast, _default } = schema
 
   if (_cast && typeof coerce === 'function') {
@@ -132,10 +132,8 @@ export function cast (schema) {
 
   return _default === undefined
     ? fn
-    : (v) =>
-        v !== undefined
-          ? fn(v)
-          : getDefault(_default)
+    : (v) => (v !== undefined ? fn(v) : getDefault(_default))
 }
 
-const getDefault = (_default) => typeof _default === 'function' ? _default() : _default
+const getDefault = (_default) =>
+  typeof _default === 'function' ? _default() : _default

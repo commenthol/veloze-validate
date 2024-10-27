@@ -104,9 +104,9 @@ export class BooleanT extends BaseT {
      * }} [opts]
      */
     constructor(opts?: {
-        required?: boolean | undefined;
-        cast?: boolean | undefined;
-        validate?: ((v: number, e?: ValidationFailure) => boolean) | undefined;
+        required?: boolean;
+        cast?: boolean;
+        validate?: (v: number, e?: ValidationFailure) => boolean;
     } | undefined);
     /** @type {((v: boolean, e?: ValidationFailure) => boolean)|undefined} */
     _validate: ((v: boolean, e?: ValidationFailure) => boolean) | undefined;
@@ -117,9 +117,9 @@ export class BooleanT extends BaseT {
     clone(): BooleanT;
 }
 export function booleanT(opts?: {
-    required?: boolean | undefined;
-    cast?: boolean | undefined;
-    validate?: ((v: number, e?: ValidationFailure) => boolean) | undefined;
+    required?: boolean;
+    cast?: boolean;
+    validate?: (v: number, e?: ValidationFailure) => boolean;
 } | undefined): BooleanT;
 export class NumberT extends BaseT {
     /**
@@ -134,13 +134,13 @@ export class NumberT extends BaseT {
      * }} [opts]
      */
     constructor(opts?: {
-        required?: boolean | undefined;
-        cast?: boolean | undefined;
-        min?: number | undefined;
-        max?: number | undefined;
-        exclusiveMin?: boolean | undefined;
-        exclusiveMax?: boolean | undefined;
-        validate?: ((v: number, e?: ValidationFailure) => boolean) | undefined;
+        required?: boolean;
+        cast?: boolean;
+        min?: number;
+        max?: number;
+        exclusiveMin?: boolean;
+        exclusiveMax?: boolean;
+        validate?: (v: number, e?: ValidationFailure) => boolean;
     } | undefined);
     /** @type {((v: number, e?: ValidationFailure) => boolean)|undefined} */
     _validate: ((v: number, e?: ValidationFailure) => boolean) | undefined;
@@ -154,13 +154,13 @@ export class NumberT extends BaseT {
     exclusiveMax(): this;
 }
 export function numberT(opts?: {
-    required?: boolean | undefined;
-    cast?: boolean | undefined;
-    min?: number | undefined;
-    max?: number | undefined;
-    exclusiveMin?: boolean | undefined;
-    exclusiveMax?: boolean | undefined;
-    validate?: ((v: number, e?: ValidationFailure) => boolean) | undefined;
+    required?: boolean;
+    cast?: boolean;
+    min?: number;
+    max?: number;
+    exclusiveMin?: boolean;
+    exclusiveMax?: boolean;
+    validate?: (v: number, e?: ValidationFailure) => boolean;
 } | undefined): NumberT;
 export class IntegerT extends NumberT {
     _min: number;
@@ -172,13 +172,13 @@ export class IntegerT extends NumberT {
     clone(): IntegerT;
 }
 export function integerT(opts?: {
-    required?: boolean | undefined;
-    cast?: boolean | undefined;
-    min?: number | undefined;
-    max?: number | undefined;
-    exclusiveMin?: boolean | undefined;
-    exclusiveMax?: boolean | undefined;
-    validate?: ((v: number, e?: ValidationFailure) => boolean) | undefined;
+    required?: boolean;
+    cast?: boolean;
+    min?: number;
+    max?: number;
+    exclusiveMin?: boolean;
+    exclusiveMax?: boolean;
+    validate?: (v: number, e?: ValidationFailure) => boolean;
 } | undefined): IntegerT;
 export function toDate(v: any): Date | undefined;
 export class DateT extends NumberT {
@@ -193,12 +193,12 @@ export class DateT extends NumberT {
      * }} [opts]
      */
     constructor(opts?: {
-        required?: boolean | undefined;
-        min?: string | number | Date | undefined;
-        max?: string | number | Date | undefined;
-        exclusiveMin?: boolean | undefined;
-        exclusiveMax?: boolean | undefined;
-        validate?: ((v: Date | number, e?: ValidationFailure) => boolean) | undefined;
+        required?: boolean;
+        min?: Date | number | string;
+        max?: Date | number | string;
+        exclusiveMin?: boolean;
+        exclusiveMax?: boolean;
+        validate?: (v: Date | number, e?: ValidationFailure) => boolean;
     } | undefined);
     /** @type {((v: Date|number, e?: ValidationFailure) => boolean)|undefined} */
     _validate: ((v: Date | number, e?: ValidationFailure) => boolean) | undefined;
@@ -220,12 +220,12 @@ export class DateT extends NumberT {
     override max(max: Date | number): this;
 }
 export function dateT(opts?: {
-    required?: boolean | undefined;
-    min?: string | number | Date | undefined;
-    max?: string | number | Date | undefined;
-    exclusiveMin?: boolean | undefined;
-    exclusiveMax?: boolean | undefined;
-    validate?: ((v: Date | number, e?: ValidationFailure) => boolean) | undefined;
+    required?: boolean;
+    min?: Date | number | string;
+    max?: Date | number | string;
+    exclusiveMin?: boolean;
+    exclusiveMax?: boolean;
+    validate?: (v: Date | number, e?: ValidationFailure) => boolean;
 } | undefined): DateT;
 export class StringT extends BaseT {
     /**
@@ -238,11 +238,11 @@ export class StringT extends BaseT {
      * }} [opts]
      */
     constructor(opts?: {
-        required?: boolean | undefined;
-        min?: number | undefined;
-        max?: number | undefined;
-        pattern?: RegExp | undefined;
-        validate?: ((v: string, e?: ValidationFailure) => boolean) | undefined;
+        required?: boolean;
+        min?: number;
+        max?: number;
+        pattern?: RegExp;
+        validate?: (v: string, e?: ValidationFailure) => boolean;
     } | undefined);
     _min: number;
     _max: number;
@@ -271,11 +271,11 @@ export class StringT extends BaseT {
     pattern(pattern: RegExp): this;
 }
 export function stringT(opts?: {
-    required?: boolean | undefined;
-    min?: number | undefined;
-    max?: number | undefined;
-    pattern?: RegExp | undefined;
-    validate?: ((v: string, e?: ValidationFailure) => boolean) | undefined;
+    required?: boolean;
+    min?: number;
+    max?: number;
+    pattern?: RegExp;
+    validate?: (v: string, e?: ValidationFailure) => boolean;
 } | undefined): StringT;
 export class EnumT extends BaseT {
     /**
@@ -285,7 +285,7 @@ export class EnumT extends BaseT {
      * }} [opts ]
      */
     constructor(list: (string | number | boolean)[], opts?: {
-        required?: boolean | undefined;
+        required?: boolean;
     } | undefined);
     _list: (string | number | boolean)[];
     /**
@@ -296,7 +296,7 @@ export class EnumT extends BaseT {
     validate(v: any, e?: {}): boolean;
 }
 export function enumT(list: (string | number | boolean)[], opts?: {
-    required?: boolean | undefined;
+    required?: boolean;
 } | undefined): EnumT;
 export class ArrayT extends BaseT {
     /**
@@ -309,10 +309,10 @@ export class ArrayT extends BaseT {
      * }} [opts]
      */
     constructor(schema: BaseT, opts?: {
-        required?: boolean | undefined;
-        min?: number | undefined;
-        max?: number | undefined;
-        validate?: ((v: any[], e: ValidationFailure) => boolean) | undefined;
+        required?: boolean;
+        min?: number;
+        max?: number;
+        validate?: (v: any[], e: ValidationFailure) => boolean;
     } | undefined);
     _min: number;
     _max: number;
@@ -327,10 +327,10 @@ export class ArrayT extends BaseT {
     validate(v: any, e?: {}): boolean;
 }
 export function arrayT(schema: BaseT, opts?: {
-    required?: boolean | undefined;
-    min?: number | undefined;
-    max?: number | undefined;
-    validate?: ((v: any[], e: ValidationFailure) => boolean) | undefined;
+    required?: boolean;
+    min?: number;
+    max?: number;
+    validate?: (v: any[], e: ValidationFailure) => boolean;
 } | undefined): ArrayT;
 export class ObjectT extends BaseT {
     /**
@@ -346,11 +346,11 @@ export class ObjectT extends BaseT {
     constructor(schema: {
         [key: string]: BaseT;
     }, opts?: {
-        required?: boolean | undefined;
-        min?: number | undefined;
-        max?: number | undefined;
-        additionalProperties?: boolean | undefined;
-        validate?: ((v: object, e?: ValidationFailure) => boolean) | undefined;
+        required?: boolean;
+        min?: number;
+        max?: number;
+        additionalProperties?: boolean;
+        validate?: (v: object, e?: ValidationFailure) => boolean;
     } | undefined);
     _min: number;
     _max: number;
@@ -370,11 +370,11 @@ export class ObjectT extends BaseT {
 export function objectT(schema: {
     [key: string]: BaseT;
 }, opts?: {
-    required?: boolean | undefined;
-    min?: number | undefined;
-    max?: number | undefined;
-    additionalProperties?: boolean | undefined;
-    validate?: ((v: object, e?: ValidationFailure) => boolean) | undefined;
+    required?: boolean;
+    min?: number;
+    max?: number;
+    additionalProperties?: boolean;
+    validate?: (v: object, e?: ValidationFailure) => boolean;
 } | undefined): ObjectT;
 export class InstanceT extends BaseT {
     constructor(instance: any, opts: any);
@@ -383,8 +383,8 @@ export class InstanceT extends BaseT {
     validate(v: any, e?: {}): boolean;
 }
 export function instanceT(instance: InstanceType<any>, opts?: {
-    required?: boolean | undefined;
-    validate?: ((v: object, e?: ValidationFailure) => boolean) | undefined;
+    required?: boolean;
+    validate?: (v: object, e?: ValidationFailure) => boolean;
 } | undefined): InstanceT;
 export class OneOf extends BaseT {
     /**

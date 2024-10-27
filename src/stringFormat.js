@@ -13,7 +13,7 @@ export class StringFormatT extends StringT {
    * validates url
    * @returns {this}
    */
-  url () {
+  url() {
     this._validate = validateUrl
     this.format = 'uri'
     return this
@@ -23,7 +23,7 @@ export class StringFormatT extends StringT {
    * validate uuid; does not check on uuid version byte
    * @returns {this}
    */
-  uuid () {
+  uuid() {
     this._validate = validateUuid
     this.format = 'uuid'
     this._minLength = this._maxLength = undefined
@@ -34,7 +34,7 @@ export class StringFormatT extends StringT {
    * expects string to be a date
    * @returns {this}
    */
-  dateTime () {
+  dateTime() {
     this._validate = validateDateTime
     this.format = 'date-time'
     return this
@@ -44,7 +44,7 @@ export class StringFormatT extends StringT {
    * expects string to be a ISO 8601 date e.g. `2018-11-13`
    * @returns {this}
    */
-  date () {
+  date() {
     this._validate = validateDate
     this.format = 'date'
     return this
@@ -55,7 +55,7 @@ export class StringFormatT extends StringT {
    * @see https://datatracker.ietf.org/doc/html/rfc3339#section-5.6
    * @returns {this}
    */
-  time () {
+  time() {
     this._validate = validateTime
     this.format = 'date'
     return this
@@ -65,7 +65,7 @@ export class StringFormatT extends StringT {
    * expects string to be a valid ECMA-262 regex
    * @returns {this}
    */
-  regex () {
+  regex() {
     this._validate = validateRegex
     this.format = 'regex'
     return this
@@ -75,7 +75,7 @@ export class StringFormatT extends StringT {
    * expects string to be a IPv4 address
    * @returns {this}
    */
-  ipv4 () {
+  ipv4() {
     this._validate = validateIPv4
     this.format = 'ipv4'
     return this
@@ -85,7 +85,7 @@ export class StringFormatT extends StringT {
    * expects string to be a IPv6 address
    * @returns {this}
    */
-  ipv6 () {
+  ipv6() {
     this._validate = validateIPv6
     this.format = 'ipv4'
     return this
@@ -97,7 +97,7 @@ export class StringFormatT extends StringT {
    * @param {EmailDomainValidationOptions} [options]
    * @returns {this}
    */
-  email (options) {
+  email(options) {
     this._validate = validateEmail(options)
     this.format = options?.ascii ? 'email' : 'idn-email'
     return this
@@ -108,7 +108,7 @@ export class StringFormatT extends StringT {
    * @param {EmailDomainValidationOptions} [options]
    * @returns {this}
    */
-  hostname (options) {
+  hostname(options) {
     this._validate = validateHostname(options)
     this.format = options?.ascii ? 'hostname' : 'idn-hostname'
     return this
@@ -216,7 +216,6 @@ export const validateTime = (string, e = {}) => {
  */
 export const validateRegex = (string, e = {}) => {
   try {
-    // eslint-disable-next-line no-new
     new RegExp(string)
     return true
   } catch (err) {
@@ -291,7 +290,7 @@ const RX_NON_ASCII = /[^\x00-\x7f]/
 
 // https://tools.ietf.org/html/rfc5321#section-4.1.2
 // https://tools.ietf.org/html/rfc5322#section-3.2.3
-const RX_ATEXT = /^[\w!#$%&'*+-/=?^_`{|}~]{1,64}$/
+const RX_ATEXT = /^[\w!#$%&'*+/=?`{|}~^-]{1,64}$/
 
 // https://tools.ietf.org/html/rfc6531#section-3.3
 // https://tools.ietf.org/html/rfc6532#section-3.1
@@ -316,7 +315,7 @@ const RX_UTF8_NON_ASCII = new RegExp(
     .join('|')
 )
 
-function toUtf8 (char) {
+function toUtf8(char) {
   return Array.from(new TextEncoder().encode(char), (v) =>
     String.fromCharCode(v)
   ).join('')
@@ -338,53 +337,53 @@ const msg = (e, msg) => {
  */
 export const validateEmail =
   (options) =>
-    (v, e = {}) => {
-      const { ascii = false } = options || {}
-      if (RX_NON_ASCII.test(v)) {
-        if (ascii) {
-          return msg(e, 'forbidden unicode')
-        }
-        v = v.normalize('NFC')
+  (v, e = {}) => {
+    const { ascii = false } = options || {}
+    if (RX_NON_ASCII.test(v)) {
+      if (ascii) {
+        return msg(e, 'forbidden unicode')
       }
-
-      // http://tools.ietf.org/html/rfc5321#section-4.5.3.1.3
-      if (new TextEncoder().encode(v).length > 254) {
-        return msg(e, 'email too long')
-      }
-
-      const parts = v.split('@')
-      if (parts.length < 2) {
-        return msg(e, 'invalid email')
-      }
-      if (parts.length > 2) {
-        return msg(e, 'multiple @ chars')
-      }
-      const [local, domain] = parts
-      if (new TextEncoder().encode(local).length > 64) {
-        return msg(e, 'local part too long')
-      }
-
-      const segments = local.split('.')
-      for (const segment of segments) {
-      // segment is in UTF-16
-        if (!segment.length) {
-          return msg(e, 'empty local segment')
-        }
-        for (const char of segment) {
-          if (RX_ATEXT.test(char)) {
-            continue
-          }
-          if (!RX_UTF8_NON_ASCII.test(toUtf8(char))) {
-            return msg(e, 'invalid character')
-          }
-        }
-      }
-      if (!domain) {
-        return msg(e, 'empty domain')
-      }
-
-      return validateHostname(options)(domain, e)
+      v = v.normalize('NFC')
     }
+
+    // http://tools.ietf.org/html/rfc5321#section-4.5.3.1.3
+    if (new TextEncoder().encode(v).length > 254) {
+      return msg(e, 'email too long')
+    }
+
+    const parts = v.split('@')
+    if (parts.length < 2) {
+      return msg(e, 'invalid email')
+    }
+    if (parts.length > 2) {
+      return msg(e, 'multiple @ chars')
+    }
+    const [local, domain] = parts
+    if (new TextEncoder().encode(local).length > 64) {
+      return msg(e, 'local part too long')
+    }
+
+    const segments = local.split('.')
+    for (const segment of segments) {
+      // segment is in UTF-16
+      if (!segment.length) {
+        return msg(e, 'empty local segment')
+      }
+      for (const char of segment) {
+        if (RX_ATEXT.test(char)) {
+          continue
+        }
+        if (!RX_UTF8_NON_ASCII.test(toUtf8(char))) {
+          return msg(e, 'invalid character')
+        }
+      }
+    }
+    if (!domain) {
+      return msg(e, 'empty domain')
+    }
+
+    return validateHostname(options)(domain, e)
+  }
 
 // https://tools.ietf.org/html/rfc1035#section-2.3.1
 const RX_DOMAIN_CHAR = /[A-Za-z0-9-]/
@@ -400,49 +399,49 @@ const RX_DOMAIN_INVALID_HYPHEN = /^-|(?<!^xn)--|-$/
  */
 export const validateHostname =
   (options) =>
-    (v, e = {}) => {
-      const { ascii = false, minDomainSegments = 2 } = options || {}
-      if (RX_NON_ASCII.test(v)) {
-        if (ascii || /(^|\.)xn--/.test(v)) {
-          return msg(e, 'forbidden unicode')
-        }
-        v = v.normalize('NFC')
+  (v, e = {}) => {
+    const { ascii = false, minDomainSegments = 2 } = options || {}
+    if (RX_NON_ASCII.test(v)) {
+      if (ascii || /(^|\.)xn--/.test(v)) {
+        return msg(e, 'forbidden unicode')
       }
-      if (RX_DOMAIN_INVALID_CHARS.test(v)) {
-        return msg(e, 'invalid domain')
-      }
-      v = parseHost(v)
-      if (!v) {
-        return msg(e, 'invalid domain')
-      }
-      // https://tools.ietf.org/html/rfc5321#section-4.5.3.1.2
-      if (v.length > 255) {
-        return msg(e, 'domain too long')
-      }
-
-      const segments = v.split('.')
-      if (segments.length < minDomainSegments) {
-        return msg(e, `less than ${minDomainSegments} domain segments`)
-      }
-      for (const segment of segments) {
-      // segment is in UTF-16
-        if (!segment.length) {
-          return msg(e, 'empty domain segment')
-        }
-        if (segment.length > 63) {
-          return msg(e, 'domain segment too long')
-        }
-        if (RX_DOMAIN_INVALID_HYPHEN.test(segment)) {
-          return msg(e, 'invalid domain characters')
-        }
-        for (const char of segment) {
-          if (!RX_DOMAIN_CHAR.test(char)) {
-            return msg(e, 'invalid domain character')
-          }
-        }
-      }
-      return true
+      v = v.normalize('NFC')
     }
+    if (RX_DOMAIN_INVALID_CHARS.test(v)) {
+      return msg(e, 'invalid domain')
+    }
+    v = parseHost(v)
+    if (!v) {
+      return msg(e, 'invalid domain')
+    }
+    // https://tools.ietf.org/html/rfc5321#section-4.5.3.1.2
+    if (v.length > 255) {
+      return msg(e, 'domain too long')
+    }
+
+    const segments = v.split('.')
+    if (segments.length < minDomainSegments) {
+      return msg(e, `less than ${minDomainSegments} domain segments`)
+    }
+    for (const segment of segments) {
+      // segment is in UTF-16
+      if (!segment.length) {
+        return msg(e, 'empty domain segment')
+      }
+      if (segment.length > 63) {
+        return msg(e, 'domain segment too long')
+      }
+      if (RX_DOMAIN_INVALID_HYPHEN.test(segment)) {
+        return msg(e, 'invalid domain characters')
+      }
+      for (const char of segment) {
+        if (!RX_DOMAIN_CHAR.test(char)) {
+          return msg(e, 'invalid domain character')
+        }
+      }
+    }
+    return true
+  }
 
 const parseHost = (v) => {
   try {

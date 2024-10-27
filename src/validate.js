@@ -42,7 +42,7 @@ export const ADD_PROPS = Object.freeze({ additionalProperties: true })
  * @param {object} that
  * @param {Options} [opts]
  */
-function addOpts (that, opts) {
+function addOpts(that, opts) {
   for (const key of Object.keys(opts || {})) {
     // @ts-expect-error
     that[`_${key}`] = opts[key]
@@ -53,7 +53,7 @@ export class ValidationError extends Error {
   /**
    * @param {ValidationFailure} e
    */
-  constructor (e) {
+  constructor(e) {
     const message = e?.message || 'validation failed'
     super(message)
     this.path = e?.path
@@ -86,7 +86,7 @@ export class BaseT {
    * @param {...any} arg arguments
    */
   // @ts-expect-error
-  _clone (T = BaseT, ...arg) {
+  _clone(T = BaseT, ...arg) {
     // @ts-expect-error
     const clone = new T(...arg)
     for (const [key, value] of Object.entries(this)) {
@@ -96,17 +96,17 @@ export class BaseT {
     return clone
   }
 
-  required () {
+  required() {
     this._required = true
     return this
   }
 
-  cast () {
+  cast() {
     this._cast = true
     return this
   }
 
-  default (v) {
+  default(v) {
     const e = {}
     const val = typeof v === 'function' ? v() : v
     if (!this.validate(val, e)) {
@@ -121,7 +121,7 @@ export class BaseT {
    * @param {number} min
    * @returns {this}
    */
-  min (min) {
+  min(min) {
     this._min = min
     return this
   }
@@ -130,7 +130,7 @@ export class BaseT {
    * @param {number} max
    * @returns {this}
    */
-  max (max) {
+  max(max) {
     this._max = max
     return this
   }
@@ -139,7 +139,7 @@ export class BaseT {
    * @param {ValidationFn} validateFn
    * @returns {this}
    */
-  custom (validateFn) {
+  custom(validateFn) {
     this._validate = validateFn
     return this
   }
@@ -151,7 +151,7 @@ export class BaseT {
    */
   /* c8 ignore next 4 */
   // eslint-disable-next-line no-unused-vars
-  validate (v, e = {}) {
+  validate(v, e = {}) {
     return false
   }
 
@@ -159,7 +159,7 @@ export class BaseT {
    * @param {any} v
    * @returns {ValidationError|null}
    */
-  analyze (v) {
+  analyze(v) {
     const e = {}
     if (!this.validate(v, e)) {
       return new ValidationError(e)
@@ -171,7 +171,7 @@ export class BaseT {
    * @throws
    * @param {any} v
    */
-  throws (v) {
+  throws(v) {
     const e = {}
     if (!this.validate(v, e)) {
       throw new ValidationError(e)
@@ -192,7 +192,7 @@ export class BooleanT extends BaseT {
    *  validate?: (v: number, e?: ValidationFailure) => boolean
    * }} [opts]
    */
-  constructor (opts) {
+  constructor(opts) {
     super()
     addOpts(this, opts)
   }
@@ -201,7 +201,7 @@ export class BooleanT extends BaseT {
    * clones the schema
    * @returns {BooleanT}
    */
-  clone () {
+  clone() {
     // @ts-expect-error
     return super._clone(BooleanT)
   }
@@ -211,7 +211,7 @@ export class BooleanT extends BaseT {
    * @param {ValidationFailure} [e]
    * @returns {boolean}
    */
-  validate (v, e = {}) {
+  validate(v, e = {}) {
     const { _required, _cast, _validate } = this
     if (!_required && v === undefined) {
       return true
@@ -257,7 +257,7 @@ export class NumberT extends BaseT {
    *  validate?: (v: number, e?: ValidationFailure) => boolean
    * }} [opts]
    */
-  constructor (opts) {
+  constructor(opts) {
     super()
     addOpts(this, opts)
     const { _min, _max } = this
@@ -271,12 +271,12 @@ export class NumberT extends BaseT {
    * clones the schema
    * @returns {NumberT}
    */
-  clone () {
+  clone() {
     // @ts-expect-error
     return super._clone(NumberT)
   }
 
-  validate (v, e = {}) {
+  validate(v, e = {}) {
     const {
       _required,
       _cast,
@@ -313,12 +313,12 @@ export class NumberT extends BaseT {
     return true
   }
 
-  exclusiveMin () {
+  exclusiveMin() {
     this._exclusiveMin = true
     return this
   }
 
-  exclusiveMax () {
+  exclusiveMax() {
     this._exclusiveMax = true
     return this
   }
@@ -353,7 +353,7 @@ export class IntegerT extends NumberT {
    *  validate?: (v: number, e?: ValidationFailure) => boolean
    * }} [opts]
    */
-  constructor (opts) {
+  constructor(opts) {
     super()
     addOpts(this, opts)
   }
@@ -362,12 +362,12 @@ export class IntegerT extends NumberT {
    * clones the schema
    * @returns {IntegerT}
    */
-  clone () {
+  clone() {
     // @ts-expect-error
     return super._clone(IntegerT)
   }
 
-  validate (v, e = {}) {
+  validate(v, e = {}) {
     const { _required } = this
     if (!_required && v === undefined) {
       return true
@@ -418,14 +418,14 @@ export class DateT extends NumberT {
    *  validate?: (v: Date|number, e?: ValidationFailure) => boolean
    * }} [opts]
    */
-  constructor (opts) {
+  constructor(opts) {
     super()
     // @ts-expect-error
     addOpts(this, opts)
     this._minMax()
   }
 
-  _minMax (min, max) {
+  _minMax(min, max) {
     const _min = toDate(min ?? this._min)
     const _max = toDate(max ?? this._max)
 
@@ -449,12 +449,12 @@ export class DateT extends NumberT {
    * clones the schema
    * @returns {DateT}
    */
-  clone () {
+  clone() {
     // @ts-expect-error
     return super._clone(DateT)
   }
 
-  validate (v, e = {}) {
+  validate(v, e = {}) {
     const {
       _required,
       /** @type {Date|undefined} */ _min,
@@ -496,7 +496,7 @@ export class DateT extends NumberT {
    * @override
    * @param {Date|number} min
    */
-  min (min) {
+  min(min) {
     return this._minMax(min)
   }
 
@@ -504,7 +504,7 @@ export class DateT extends NumberT {
    * @override
    * @param {Date|number} max
    */
-  max (max) {
+  max(max) {
     return this._minMax(undefined, max)
   }
 }
@@ -544,7 +544,7 @@ export class StringT extends BaseT {
    *  validate?: (v: string, e?: ValidationFailure) => boolean
    * }} [opts]
    */
-  constructor (opts) {
+  constructor(opts) {
     super()
     addOpts(this, opts)
     this._minMax()
@@ -554,7 +554,7 @@ export class StringT extends BaseT {
     }
   }
 
-  _minMax (min, max) {
+  _minMax(min, max) {
     const _min = min ?? this._min
     const _max = max ?? this._max
     if (_min < 0 || _max < 0 || _min > _max) {
@@ -569,12 +569,12 @@ export class StringT extends BaseT {
    * clones the schema
    * @returns {StringT}
    */
-  clone () {
+  clone() {
     // @ts-expect-error
     return super._clone(StringT)
   }
 
-  validate (v, e = {}) {
+  validate(v, e = {}) {
     const { _required, _min, _max, _pattern, _validate } = this
     if (!_required && (v === undefined || v === '')) {
       return true
@@ -605,21 +605,21 @@ export class StringT extends BaseT {
   /**
    * @param {number} min
    */
-  min (min) {
+  min(min) {
     return this._minMax(min)
   }
 
   /**
    * @param {number} max
    */
-  max (max) {
+  max(max) {
     return this._minMax(undefined, max)
   }
 
   /**
    * @param {RegExp} pattern
    */
-  pattern (pattern) {
+  pattern(pattern) {
     if (!(pattern instanceof RegExp)) {
       throw TypeError('pattern not a regex')
     }
@@ -648,7 +648,7 @@ export class EnumT extends BaseT {
    *  required?: boolean
    * }} [opts ]
    */
-  constructor (list, opts) {
+  constructor(list, opts) {
     super()
     addOpts(this, opts)
 
@@ -662,12 +662,12 @@ export class EnumT extends BaseT {
    * clones the schema
    * @returns {EnumT}
    */
-  clone () {
+  clone() {
     // @ts-expect-error
     return super._clone(EnumT, this._list)
   }
 
-  validate (v, e = {}) {
+  validate(v, e = {}) {
     const { _required, _list } = this
     if (!_required && v === undefined) {
       return true
@@ -704,7 +704,7 @@ export class ArrayT extends BaseT {
    *  validate?: (v: any[], e: ValidationFailure) => boolean
    * }} [opts]
    */
-  constructor (schema, opts) {
+  constructor(schema, opts) {
     super()
     // @ts-expect-error
     addOpts(this, opts)
@@ -723,12 +723,12 @@ export class ArrayT extends BaseT {
    * clones the schema
    * @returns {ArrayT}
    */
-  clone () {
+  clone() {
     // @ts-expect-error
     return super._clone(ArrayT, this._schema)
   }
 
-  validate (v, e = {}) {
+  validate(v, e = {}) {
     const { _required, _min, _max, _schema, _validate } = this
     if (!_required && v === undefined) {
       return true
@@ -792,7 +792,7 @@ export class ObjectT extends BaseT {
    *  validate?: (v: object, e?: ValidationFailure) => boolean
    * }} [opts]
    */
-  constructor (schema, opts) {
+  constructor(schema, opts) {
     super()
     addOpts(this, opts)
 
@@ -810,12 +810,12 @@ export class ObjectT extends BaseT {
    * clones the schema
    * @returns {ObjectT}
    */
-  clone () {
+  clone() {
     // @ts-expect-error
     return super._clone(ObjectT, this._schema)
   }
 
-  validate (v, e = {}) {
+  validate(v, e = {}) {
     const { _required, _min, _max, _additionalProperties, _schema, _validate } =
       this
 
@@ -869,7 +869,7 @@ export class ObjectT extends BaseT {
     return true
   }
 
-  additionalProperties () {
+  additionalProperties() {
     this._additionalProperties = true
     return this
   }
@@ -890,18 +890,18 @@ export const objectT = (schema, opts) => new ObjectT(schema, opts)
 export class InstanceT extends BaseT {
   type = 'instance'
 
-  constructor (instance, opts) {
+  constructor(instance, opts) {
     super()
     addOpts(this, opts)
     this._instance = instance
   }
 
-  clone () {
+  clone() {
     // @ts-expect-error
     return super._clone(InstanceT, this._instance)
   }
 
-  validate (v, e = {}) {
+  validate(v, e = {}) {
     const { _required, _validate } = this
     if (!_required && v === undefined) {
       return true
@@ -934,7 +934,7 @@ export class OneOf extends BaseT {
    * Data must be valid against exactly one of the given schemas.
    * @param {BaseT[]} schemas
    */
-  constructor (schemas) {
+  constructor(schemas) {
     if (!Array.isArray(schemas)) {
       throw TypeError('schema array expected')
     }
@@ -946,12 +946,12 @@ export class OneOf extends BaseT {
    * clones the schema
    * @returns {OneOf}
    */
-  clone () {
+  clone() {
     // @ts-expect-error
     return super._clone(OneOf, this._schemas)
   }
 
-  validate (v, e = {}) {
+  validate(v, e = {}) {
     let matched = 0
     for (const schema of this._schemas) {
       if (schema.validate(v)) {
@@ -990,7 +990,7 @@ export class AnyOf extends BaseT {
    * Data must be valid against any (one or more) of the given schemas
    * @param {BaseT[]} schemas
    */
-  constructor (schemas) {
+  constructor(schemas) {
     if (!Array.isArray(schemas)) {
       throw TypeError('schema array expected')
     }
@@ -1002,12 +1002,12 @@ export class AnyOf extends BaseT {
    * clones the schema
    * @returns {AnyOf}
    */
-  clone () {
+  clone() {
     // @ts-expect-error
     return super._clone(AnyOf, this._schemas)
   }
 
-  validate (v, e = {}) {
+  validate(v, e = {}) {
     const path = [...(e.path || [])]
     for (const schema of this._schemas) {
       const _e = { path: [...path] }
@@ -1040,7 +1040,7 @@ export class AllOf extends BaseT {
    * Data must be valid against all of the given schemas
    * @param {BaseT[]} schemas
    */
-  constructor (schemas) {
+  constructor(schemas) {
     if (!Array.isArray(schemas)) {
       throw TypeError('schema array expected')
     }
@@ -1052,12 +1052,12 @@ export class AllOf extends BaseT {
    * clones the schema
    * @returns {AllOf}
    */
-  clone () {
+  clone() {
     // @ts-expect-error
     return super._clone(AllOf, this._schemas)
   }
 
-  validate (v, e = {}) {
+  validate(v, e = {}) {
     const path = [...(e.path || [])]
     let cnt = 0
     for (const schema of this._schemas) {

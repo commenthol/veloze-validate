@@ -54,12 +54,7 @@ describe('stringFormatT', function () {
       })
     })
 
-    const testsFail = [
-      '10002.3.4',
-      '1.2.3.4.5',
-      '256.0.0.0',
-      '260.0.0.0'
-    ]
+    const testsFail = ['10002.3.4', '1.2.3.4.5', '256.0.0.0', '260.0.0.0']
     testsFail.forEach((ip) => {
       it('shall fail ' + ip, function () {
         const e = {}

@@ -308,11 +308,11 @@ describe('jsonSchema', function () {
   it('schema.jsonSchema', function () {
     class AlwaysValid {
       type = 'alwaysValid'
-      validate (_v) {
+      validate(_v) {
         return true
       }
 
-      jsonSchema () {
+      jsonSchema() {
         return { type: this.type }
       }
     }

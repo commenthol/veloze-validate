@@ -1,22 +1,25 @@
 /* eslint no-console: off */
 import { t } from '../src/index.js'
 
-const schema = t.object({
-  bool: t.boolean(), // optional boolean
-  num: t.number().min(-1).max(10), // optional number [-1..10]
-  int: t.integer().min(0).max(10), // optional integer [0,1,..10]
-  str: t.string(), // optional string
-  arr: t.array(t.oneOf([t.string(), t.integer()])), // optional array of string or integers
-  obj: t.object({
-    // required nested object with
-    nested: t.string() // optional string
-  }).required(),
-  all: t.allOf([
-    // either or both
-    t.object({ flag: t.boolean() }).additionalProperties(),
-    t.object({ test: t.integer() }).additionalProperties()
-  ])
-})
+const schema = t
+  .object({
+    bool: t.boolean(), // optional boolean
+    num: t.number().min(-1).max(10), // optional number [-1..10]
+    int: t.integer().min(0).max(10), // optional integer [0,1,..10]
+    str: t.string(), // optional string
+    arr: t.array(t.oneOf([t.string(), t.integer()])), // optional array of string or integers
+    obj: t
+      .object({
+        // required nested object with
+        nested: t.string() // optional string
+      })
+      .required(),
+    all: t.allOf([
+      // either or both
+      t.object({ flag: t.boolean() }).additionalProperties(),
+      t.object({ test: t.integer() }).additionalProperties()
+    ])
+  })
   .required()
   .additionalProperties()
 

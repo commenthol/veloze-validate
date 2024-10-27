@@ -5,7 +5,11 @@ const subschema = {
   num: t.number({ min: 0, max: 100, exclusiveMax: true }),
   str: t.string().required()
 }
-const schema = t.object(subschema, { min: 1, required: true, additionalProperties: true })
+const schema = t.object(subschema, {
+  min: 1,
+  required: true,
+  additionalProperties: true
+})
 
 schema.validate({ str: 'hi', num: 2 }) // true
 

@@ -1,6 +1,5 @@
 import terser from '@rollup/plugin-terser'
 import cleanup from 'rollup-plugin-cleanup'
-import sourcemaps from 'rollup-plugin-sourcemaps'
 
 export default [
   {
@@ -22,7 +21,7 @@ export default [
         sourcemap: true
       }
     ],
-    plugins: [terser(), sourcemaps()]
+    plugins: [terser()]
   },
   {
     input: 'src/validate.js',
@@ -43,6 +42,6 @@ export default [
         sourcemap: true
       }
     ],
-    plugins: [terser(), sourcemaps()]
+    plugins: [terser()]
   }
 ]

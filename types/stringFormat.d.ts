@@ -142,8 +142,8 @@ export function validateIPv4(string: string, e?: import("./validate.js").Validat
 export function validateIPv6(string: string, e?: import("./validate.js").ValidationFailure | undefined): boolean;
 export function validateEmail(options?: EmailDomainValidationOptions | undefined): ValidationFn;
 export function validateHostname(options?: EmailDomainValidationOptions | undefined): ValidationFn;
-export type ValidationFailure = import("./validate").ValidationFailure;
-export type ValidationFn = import("./validate").ValidationFn;
+export type ValidationFailure = import("./validate.js").ValidationFailure;
+export type ValidationFn = import("./validate.js").ValidationFn;
 export type EmailDomainValidationOptions = {
     ascii?: boolean | undefined;
     minDomainSegments?: number | undefined;

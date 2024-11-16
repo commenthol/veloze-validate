@@ -278,8 +278,8 @@ export const validateIPv6 = (string, e = {}) => {
 
 /* eslint no-control-regex: off */
 
-/** @typedef {import('./validate').ValidationFailure} ValidationFailure */
-/** @typedef {import('./validate').ValidationFn} ValidationFn */
+/** @typedef {import('./validate.js').ValidationFailure} ValidationFailure */
+/** @typedef {import('./validate.js').ValidationFn} ValidationFn */
 /**
  * @typedef {object} EmailDomainValidationOptions
  * @property {boolean} [ascii]

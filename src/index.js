@@ -1,6 +1,6 @@
-/** @typedef {import('./validate').ValidationFn} ValidationFn */
-/** @typedef {import('./validate').ValidationFailure} ValidationFailure */
-/** @typedef {import('./stringFormat').EmailDomainValidationOptions} EmailDomainValidationOptions */
+/** @typedef {import('./validate.js').ValidationFn} ValidationFn */
+/** @typedef {import('./validate.js').ValidationFailure} ValidationFailure */
+/** @typedef {import('./stringFormat.js').EmailDomainValidationOptions} EmailDomainValidationOptions */
 
 export {
   REQUIRED,
